@@ -1,0 +1,23 @@
+name: ledger_flutter
+description: A new Flutter project.
+version: 0.0.1
+homepage: https://blockshake.io
+repository: https://github.com/RootSoft/ledger-flutter
+issue_tracker: https://github.com/RootSoft/ledger-flutter/issues
+
+environment:
+  sdk: '>=2.18.2 <3.0.0'
+  flutter: ">=1.17.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  flutter_reactive_ble: ^5.0.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+
+flutter:
