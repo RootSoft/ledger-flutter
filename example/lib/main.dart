@@ -1,71 +1,32 @@
 import 'package:flutter/material.dart';
-import 'package:ledger_flutter/ledger_flutter.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ledger_example/bloc/ledger_bloc.dart';
+import 'package:ledger_example/channel/ledger_channel.dart';
+import 'package:ledger_example/screens/ledger_ble_screen.dart';
 
-void main() {
-  final options = LedgerOptions();
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
 
-  final ledger = Ledger(options: options);
-
-  runApp(const MyApp());
+  runApp(const LedgerBleApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class LedgerBleApp extends StatelessWidget {
+  const LedgerBleApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Ledger Nano',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
-    );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
+      home: MultiBlocProvider(
+        providers: [
+          BlocProvider(
+            create: (_) => LedgerBleBloc(channel: LedgerChannel()),
+          ),
+        ],
+        child: const LedgerBleScreen(),
       ),
     );
   }

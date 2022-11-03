@@ -10,6 +10,13 @@ dependencies:
   flutter:
     sdk: flutter
 
+  bloc: ^8.1.0
+  flutter_bloc: ^8.1.1
+  bloc_concurrency: ^0.2.0
+  equatable: ^2.0.5
+
+  permission_handler: ^10.2.0
+
   ledger_flutter:
     path: ../
 

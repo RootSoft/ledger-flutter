@@ -37,3 +37,30 @@ const like = 'sample';
 TODO: Tell users more about the package: where to find more information, how to
 contribute to the package, how to file issues, what response they can expect
 from the package authors, and more.
+
+## TODO
+
+### Android
+compileSdkVersion 33
+minSdkVersion 21
+
+<uses-permission android:name="android.permission.INTERNET"/>
+<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+<uses-permission android:name="android.permission.BLUETOOTH"/>
+<uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+
+
+### IOS
+<key>NSBluetoothAlwaysUsageDescription</key>
+<string>Need BLE permission</string>
+<key>NSBluetoothPeripheralUsageDescription</key>
+<string>Need BLE permission</string>
+<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+<string>Need Location permission</string>
+<key>NSLocationAlwaysUsageDescription</key>
+<string>Need Location permission</string>
+<key>NSLocationWhenInUseUsageDescription</key>
+<string>Need Location permission</string>
+
+
+
