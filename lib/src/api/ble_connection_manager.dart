@@ -1,3 +1,4 @@
+import 'package:ledger_flutter/src/ble/ble_request.dart';
 import 'package:ledger_flutter/src/ledger.dart';
 
 abstract class BleConnectionManager {
@@ -6,6 +7,8 @@ abstract class BleConnectionManager {
   Future<void> connect(LedgerDevice device);
 
   Future<void> disconnect(LedgerDevice device);
+
+  Future<void> sendRequest(LedgerDevice device, BleRequest request);
 
   Future<void> stop();
 

@@ -63,6 +63,11 @@ class _LedgerBleViewState extends State<LedgerBleView> {
             ),
             TextButton(
               onPressed:
+                  state.status == LedgerBleStatus.scanning ? () {} : null,
+              child: Text('Stop scanning'),
+            ),
+            TextButton(
+              onPressed:
                   state.status == LedgerBleStatus.connected ? () {} : null,
               child: Text('Sign transaction'),
             ),

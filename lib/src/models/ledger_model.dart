@@ -1,3 +1,4 @@
+import 'package:ledger_flutter/src/algorand/public_key_ble_request.dart';
 import 'package:ledger_flutter/src/api/ledger_ble_connection_manager.dart';
 import 'package:ledger_flutter/src/ledger.dart';
 
@@ -34,6 +35,9 @@ class Ledger {
   Future<void> stop() => _bleConnectionManager.stop();
 
   Future<void> dispose() => _bleConnectionManager.dispose();
+
+  Future<void> getAddresses(LedgerDevice device) =>
+      _bleConnectionManager.sendRequest(device, PublicKeyBleRequest());
 
   Future<void> requestPermissions() async {}
 }

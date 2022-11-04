@@ -2,16 +2,22 @@ import 'dart:async';
 
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'package:ledger_flutter/ledger_flutter.dart';
+import 'package:ledger_flutter/src/ble/ble_request.dart';
+import 'package:ledger_flutter/src/ble/gatt_gateway.dart';
+import 'package:ledger_flutter/src/ble/ledger_gatt_gateway.dart';
+import 'package:ledger_flutter/src/models/discovered_ledger.dart';
 
 class LedgerBleConnectionManager extends BleConnectionManager {
   /// Ledger Nano X service id
   static const serviceId = '13D63400-2C97-0004-0000-4C6564676572';
+  static const writeCharacteristicKey = '13D63400-2C97-0004-0002-4C6564676572';
+  static const notifyCharacteristicKey = '13D63400-2C97-0004-0001-4C6564676572';
 
   final bleManager = FlutterReactiveBle();
   final LedgerOptions options;
   final PermissionRequestCallback? onPermissionRequest;
   final _scannedIds = <String>{};
-  final _connectedDevices = <String, StreamSubscription?>{};
+  final _connectedDevices = <String, GattGateway>{};
 
   bool _isScanning = false;
   StreamSubscription? _scanSubscription;
@@ -43,21 +49,23 @@ class LedgerBleConnectionManager extends BleConnectionManager {
     _scanSubscription = bleManager.scanForDevices(
       withServices: [Uuid.parse(serviceId)],
       scanMode: ScanMode.lowLatency,
-    ).listen((device) {
-      if (_scannedIds.contains(device.id)) {
-        return;
-      }
+    ).listen(
+      (device) {
+        if (_scannedIds.contains(device.id)) {
+          return;
+        }
 
-      final lDevice = LedgerDevice(
-        id: device.id,
-        address: device.id,
-        name: device.name,
-        rssi: device.rssi,
-      );
+        final lDevice = LedgerDevice(
+          id: device.id,
+          address: device.id,
+          name: device.name,
+          rssi: device.rssi,
+        );
 
-      _scannedIds.add(lDevice.id);
-      streamController.add(lDevice);
-    });
+        _scannedIds.add(lDevice.id);
+        streamController.add(lDevice);
+      },
+    );
 
     Future.delayed(Duration(milliseconds: options.maxScanDuration), () {
       stop();
@@ -81,7 +89,7 @@ class LedgerBleConnectionManager extends BleConnectionManager {
 
     StreamSubscription? subscription;
 
-    _connectedDevices[device.id]?.cancel();
+    _connectedDevices[device.id]?.disconnect();
     subscription = bleManager
         .connectToAdvertisingDevice(
       id: device.id,
@@ -90,9 +98,23 @@ class LedgerBleConnectionManager extends BleConnectionManager {
       connectionTimeout: const Duration(seconds: 2),
     )
         .listen(
-      (state) {
+      (state) async {
         if (state.connectionState == DeviceConnectionState.connected) {
-          _connectedDevices[device.id] = subscription;
+          final services = await bleManager.discoverServices(device.id);
+          final ledger = DiscoveredLedger(
+            device: device,
+            subscription: subscription,
+            services: services,
+          );
+
+          final gateway = LedgerGattGateway(
+            bleManager: bleManager,
+            ledger: ledger,
+          );
+
+          await gateway.start();
+          _connectedDevices[device.id] = gateway;
+
           c.complete();
         }
 
@@ -107,8 +129,14 @@ class LedgerBleConnectionManager extends BleConnectionManager {
   }
 
   @override
+  Future<void> sendRequest(LedgerDevice device, BleRequest request) async {
+    await _connectedDevices[device.id]?.sendRequest(request);
+    print('done');
+  }
+
+  @override
   Future<void> disconnect(LedgerDevice device) async {
-    _connectedDevices[device.id]?.cancel();
+    _connectedDevices[device.id]?.disconnect();
     _connectedDevices.remove(device.id);
   }
 
@@ -123,7 +151,7 @@ class LedgerBleConnectionManager extends BleConnectionManager {
     await stop();
 
     for (var subscription in _connectedDevices.values) {
-      subscription?.cancel();
+      subscription.disconnect();
     }
 
     _connectedDevices.clear();

@@ -10,6 +10,7 @@ class LedgerChannel {
     final options = LedgerOptions(
       maxScanDuration: 5000,
     );
+
     final ledger = Ledger(
       options: options,
       onPermissionRequest: () async {

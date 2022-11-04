@@ -23,11 +23,15 @@ class LedgerBleBloc extends Bloc<LedgerBleEvent, LedgerBleState> {
   }
 
   Future<void> _onScanStarted(LedgerBleScanStarted event, Emitter emit) async {
+    emit(state.copyWith(
+      status: () => LedgerBleStatus.scanning,
+    ));
+
     await emit.forEach(
       channel.ledger.scan(),
       onData: (data) {
         return state.copyWith(
-          status: () => LedgerBleStatus.devicesFound,
+          status: () => LedgerBleStatus.scanning,
           devices: () => [...state.devices, data],
         );
       },
@@ -40,6 +44,7 @@ class LedgerBleBloc extends Bloc<LedgerBleEvent, LedgerBleState> {
   ) async {
     final device = event.device;
     await channel.ledger.connect(device);
+    await channel.ledger.getAddresses(device);
 
     emit(state.copyWith(
       status: () => LedgerBleStatus.connected,

@@ -3,7 +3,7 @@ import 'package:ledger_flutter/ledger_flutter.dart';
 
 enum LedgerBleStatus {
   idle,
-  devicesFound,
+  scanning,
   connected,
   signing,
 }
