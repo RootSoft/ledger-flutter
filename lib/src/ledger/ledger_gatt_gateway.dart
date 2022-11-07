@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:collection';
 
 import 'package:collection/collection.dart';
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
@@ -8,6 +9,7 @@ import 'package:ledger_flutter/src/exceptions/ledger_exception.dart';
 import 'package:ledger_flutter/src/ledger/ledger_gatt_reader.dart';
 import 'package:ledger_flutter/src/models/discovered_ledger.dart';
 import 'package:ledger_flutter/src/utils/buffer.dart';
+import 'package:stack_trace/stack_trace.dart';
 
 /// https://learn.adafruit.com/introduction-to-bluetooth-low-energy/gatt
 /// https://gist.github.com/btchip/e4994180e8f4710d29c975a49de46e3a
@@ -24,14 +26,18 @@ class LedgerGattGateway extends GattGateway {
 
   DiscoveredCharacteristic? characteristicWrite;
   DiscoveredCharacteristic? characteristicNotify;
-  int mtu;
+  int _mtu;
+
+  /// The map of request ids to pending requests.
+  final _pendingOperations = ListQueue<_Request>();
 
   LedgerGattGateway({
     required this.bleManager,
     required this.ledger,
     LedgerGattReader? gattReader,
-    this.mtu = 23,
-  }) : _gattReader = gattReader ?? LedgerGattReader();
+    int mtu = 23,
+  })  : _gattReader = gattReader ?? LedgerGattReader(),
+        _mtu = mtu;
 
   @override
   Future<void> start() async {
@@ -40,12 +46,12 @@ class LedgerGattGateway extends GattGateway {
       throw LedgerException('Required service not supported');
     }
 
-    mtu = await bleManager.requestMtu(
+    _mtu = await bleManager.requestMtu(
       deviceId: ledger.device.id,
       mtu: 23,
     );
 
-    print(mtu);
+    print(_mtu);
     print(Uuid.parse(serviceId));
     print(characteristicNotify!.serviceId);
 
@@ -58,10 +64,25 @@ class LedgerGattGateway extends GattGateway {
     _gattReader.read(
       bleManager.subscribeToCharacteristic(characteristic),
       onData: (data) {
-        print(data);
+        if (_pendingOperations.isEmpty) {
+          return;
+        }
+
+        final request = _pendingOperations.removeFirst();
+        final reader = ByteDataReader();
+        int offset = (data.length >= 2) ? 2 : 0;
+        reader.add(data.sublist(0, data.length - offset));
+        final response = request.request.read(reader, 0, _mtu);
+
+        request.completer.complete(response);
       },
       onError: (ex) {
-        print(ex);
+        if (_pendingOperations.isEmpty) {
+          return;
+        }
+
+        final request = _pendingOperations.removeFirst();
+        request.completer.completeError(ex);
       },
     );
 
@@ -71,11 +92,12 @@ class LedgerGattGateway extends GattGateway {
   @override
   Future<void> disconnect() async {
     _gattReader.close();
+    _pendingOperations.clear();
     ledger.disconnect();
   }
 
   @override
-  Future<void> sendRequest(BleRequest request) async {
+  Future<T> sendRequest<T>(BleRequest request) async {
     final supported = isRequiredServiceSupported();
     if (!supported) {
       throw LedgerException('Required service not supported');
@@ -89,7 +111,7 @@ class LedgerGattGateway extends GattGateway {
 
     const int index = 0x00;
     final payloadBuffer = ByteDataWriter();
-    final payload = await request.payload(payloadBuffer, index, mtu);
+    final payload = await request.write(payloadBuffer, index, _mtu);
     print('Payload: $payload');
 
     final buffer = ByteDataWriter();
@@ -105,6 +127,10 @@ class LedgerGattGateway extends GattGateway {
       characteristic,
       value: data,
     );
+
+    var completer = Completer<T>.sync();
+    _pendingOperations.addFirst(_Request(request, completer, Chain.current()));
+    return completer.future;
   }
 
   @override
@@ -127,6 +153,10 @@ class LedgerGattGateway extends GattGateway {
     characteristicWrite = null;
     characteristicNotify = null;
   }
+
+  /// Get the MTU.
+  /// The Maximum Transmission Unit (MTU) is the maximum length of an ATT packet.
+  int get mtu => _mtu;
 
   /// Returns a DiscoveredService, if the requested UUID is supported by the
   /// remote device.
@@ -166,6 +196,20 @@ class LedgerGattGateway extends GattGateway {
   Future<void> close() async {
     disconnect();
   }
+}
+
+/// A pending request to the server.
+class _Request {
+  /// The method that was sent.
+  final BleRequest request;
+
+  /// The completer to use to complete the response future.
+  final Completer completer;
+
+  /// The stack chain from where the request was made.
+  final Chain chain;
+
+  _Request(this.request, this.completer, this.chain);
 }
 
 extension ObjectExt<T> on T {

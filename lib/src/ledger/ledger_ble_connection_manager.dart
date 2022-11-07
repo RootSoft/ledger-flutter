@@ -4,6 +4,7 @@ import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'package:ledger_flutter/ledger_flutter.dart';
 import 'package:ledger_flutter/src/api/ble_request.dart';
 import 'package:ledger_flutter/src/api/gatt_gateway.dart';
+import 'package:ledger_flutter/src/exceptions/ledger_exception.dart';
 import 'package:ledger_flutter/src/ledger/ledger_gatt_gateway.dart';
 import 'package:ledger_flutter/src/models/discovered_ledger.dart';
 
@@ -46,6 +47,7 @@ class LedgerBleConnectionManager extends BleConnectionManager {
     _isScanning = true;
     _scannedIds.clear();
 
+    _scanSubscription?.cancel();
     _scanSubscription = bleManager.scanForDevices(
       withServices: [Uuid.parse(serviceId)],
       scanMode: ScanMode.lowLatency,
@@ -129,9 +131,13 @@ class LedgerBleConnectionManager extends BleConnectionManager {
   }
 
   @override
-  Future<void> sendRequest(LedgerDevice device, BleRequest request) async {
-    await _connectedDevices[device.id]?.sendRequest(request);
-    print('done');
+  Future<T> sendRequest<T>(LedgerDevice device, BleRequest request) async {
+    final d = _connectedDevices[device.id];
+    if (d == null) {
+      throw LedgerException();
+    }
+
+    return d.sendRequest<T>(request);
   }
 
   @override

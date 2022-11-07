@@ -22,7 +22,7 @@ abstract class GattGateway {
 
   void onServicesInvalidated();
 
-  Future<void> sendRequest(BleRequest request);
+  Future<T> sendRequest<T>(BleRequest request);
 
   DiscoveredService? getService(Uuid service);
 

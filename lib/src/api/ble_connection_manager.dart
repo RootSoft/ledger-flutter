@@ -8,7 +8,7 @@ abstract class BleConnectionManager {
 
   Future<void> disconnect(LedgerDevice device);
 
-  Future<void> sendRequest(LedgerDevice device, BleRequest request);
+  Future<T> sendRequest<T>(LedgerDevice device, BleRequest request);
 
   Future<void> stop();
 

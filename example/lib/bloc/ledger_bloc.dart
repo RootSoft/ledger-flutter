@@ -44,7 +44,8 @@ class LedgerBleBloc extends Bloc<LedgerBleEvent, LedgerBleState> {
   ) async {
     final device = event.device;
     await channel.ledger.connect(device);
-    await channel.ledger.getAddresses(device);
+    final accounts = await channel.ledger.getAccounts(device);
+    print(accounts);
 
     emit(state.copyWith(
       status: () => LedgerBleStatus.connected,

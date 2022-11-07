@@ -32,7 +32,7 @@ class LedgerGattReader {
     subscription?.cancel();
     subscription = stream.listen(
       (data) {
-        print('Response: $data');
+        print('Packet: $data');
 
         // Packets always start with the command & sequence
         final reader = ByteDataReader();
@@ -71,7 +71,9 @@ class LedgerGattReader {
           reset();
         }
       },
-      onError: (ex) {},
+      onError: (ex) {
+        onError?.call(ex);
+      },
     );
   }
 
@@ -80,6 +82,7 @@ class LedgerGattReader {
     void Function(Uint8List event)? onData,
     Function? onError,
   }) {
+    print('Response: $data');
     reset();
 
     if (data.length == ERROR_DATA_SIZE) {
@@ -99,6 +102,8 @@ class LedgerGattReader {
   }
 
   Future<void> close() async {
+    reset();
+
     subscription?.cancel();
   }
 }

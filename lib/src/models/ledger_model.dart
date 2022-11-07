@@ -1,4 +1,4 @@
-import 'package:ledger_flutter/src/algorand/public_key_ble_request.dart';
+import 'package:ledger_flutter/src/algorand/algorand_public_key_operation.dart';
 import 'package:ledger_flutter/src/ledger.dart';
 import 'package:ledger_flutter/src/ledger/ledger_ble_connection_manager.dart';
 
@@ -21,10 +21,7 @@ class Ledger {
             );
 
   Stream<LedgerDevice> scan({String? filteredAddress}) =>
-      _bleConnectionManager.scan(
-        filteredAddress: filteredAddress,
-        //onDeviceFound: (device) {},
-      );
+      _bleConnectionManager.scan(filteredAddress: filteredAddress);
 
   Future<void> connect(LedgerDevice device) =>
       _bleConnectionManager.connect(device);
@@ -36,6 +33,6 @@ class Ledger {
 
   Future<void> dispose() => _bleConnectionManager.dispose();
 
-  Future<void> getAddresses(LedgerDevice device) =>
-      _bleConnectionManager.sendRequest(device, PublicKeyBleRequest());
+  Future<String> getAccounts(LedgerDevice device) => _bleConnectionManager
+      .sendRequest<String>(device, AlgorandPublicKeyOperation(accountIndex: 0));
 }
