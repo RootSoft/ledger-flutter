@@ -1,4 +1,4 @@
-import 'package:ledger_flutter/src/ble/ble_request.dart';
+import 'package:ledger_flutter/src/api/ble_request.dart';
 import 'package:ledger_flutter/src/ledger.dart';
 
 abstract class BleConnectionManager {

@@ -1,5 +1,5 @@
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
-import 'package:ledger_flutter/src/ble/ble_request.dart';
+import 'package:ledger_flutter/src/api/ble_request.dart';
 
 /// GATT is an acronym for the Generic ATTribute Profile, and it defines
 /// the way that two Bluetooth Low Energy devices transfer data back and forth
@@ -30,4 +30,6 @@ abstract class GattGateway {
     DiscoveredService service,
     Uuid characteristic,
   );
+
+  Future<void> close();
 }

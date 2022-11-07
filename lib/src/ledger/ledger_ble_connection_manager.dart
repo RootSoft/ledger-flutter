@@ -2,9 +2,9 @@ import 'dart:async';
 
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'package:ledger_flutter/ledger_flutter.dart';
-import 'package:ledger_flutter/src/ble/ble_request.dart';
-import 'package:ledger_flutter/src/ble/gatt_gateway.dart';
-import 'package:ledger_flutter/src/ble/ledger_gatt_gateway.dart';
+import 'package:ledger_flutter/src/api/ble_request.dart';
+import 'package:ledger_flutter/src/api/gatt_gateway.dart';
+import 'package:ledger_flutter/src/ledger/ledger_gatt_gateway.dart';
 import 'package:ledger_flutter/src/models/discovered_ledger.dart';
 
 class LedgerBleConnectionManager extends BleConnectionManager {

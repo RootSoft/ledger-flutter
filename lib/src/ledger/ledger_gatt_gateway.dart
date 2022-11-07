@@ -2,12 +2,15 @@ import 'dart:async';
 
 import 'package:collection/collection.dart';
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
-import 'package:ledger_flutter/src/ble/ble_request.dart';
-import 'package:ledger_flutter/src/ble/gatt_gateway.dart';
+import 'package:ledger_flutter/src/api/ble_request.dart';
+import 'package:ledger_flutter/src/api/gatt_gateway.dart';
 import 'package:ledger_flutter/src/exceptions/ledger_exception.dart';
+import 'package:ledger_flutter/src/ledger/ledger_gatt_reader.dart';
 import 'package:ledger_flutter/src/models/discovered_ledger.dart';
+import 'package:ledger_flutter/src/utils/buffer.dart';
 
 /// https://learn.adafruit.com/introduction-to-bluetooth-low-energy/gatt
+/// https://gist.github.com/btchip/e4994180e8f4710d29c975a49de46e3a
 class LedgerGattGateway extends GattGateway {
   /// Ledger Nano X service id
   static const serviceId = '13D63400-2C97-0004-0000-4C6564676572';
@@ -17,15 +20,18 @@ class LedgerGattGateway extends GattGateway {
 
   final FlutterReactiveBle bleManager;
   final DiscoveredLedger ledger;
+  final LedgerGattReader _gattReader;
 
   DiscoveredCharacteristic? characteristicWrite;
   DiscoveredCharacteristic? characteristicNotify;
-  StreamSubscription? notification;
+  int mtu;
 
   LedgerGattGateway({
     required this.bleManager,
     required this.ledger,
-  });
+    LedgerGattReader? gattReader,
+    this.mtu = 23,
+  }) : _gattReader = gattReader ?? LedgerGattReader();
 
   @override
   Future<void> start() async {
@@ -34,12 +40,12 @@ class LedgerGattGateway extends GattGateway {
       throw LedgerException('Required service not supported');
     }
 
-    final negotiated = await bleManager.requestMtu(
+    mtu = await bleManager.requestMtu(
       deviceId: ledger.device.id,
       mtu: 23,
     );
 
-    print(negotiated);
+    print(mtu);
     print(Uuid.parse(serviceId));
     print(characteristicNotify!.serviceId);
 
@@ -49,20 +55,22 @@ class LedgerGattGateway extends GattGateway {
       deviceId: ledger.device.id,
     );
 
-    notification =
-        bleManager.subscribeToCharacteristic(characteristic).listen((event) {
-      print('Event received');
-      print(event);
-    }, onError: (ex) {
-      print(ex);
-    });
+    _gattReader.read(
+      bleManager.subscribeToCharacteristic(characteristic),
+      onData: (data) {
+        print(data);
+      },
+      onError: (ex) {
+        print(ex);
+      },
+    );
 
     await Future.delayed(const Duration(seconds: 2));
   }
 
   @override
   Future<void> disconnect() async {
-    notification?.cancel();
+    _gattReader.close();
     ledger.disconnect();
   }
 
@@ -79,10 +87,23 @@ class LedgerGattGateway extends GattGateway {
       deviceId: ledger.device.id,
     );
 
-    final payload = await request.payload(0x00);
+    const int index = 0x00;
+    final payloadBuffer = ByteDataWriter();
+    final payload = await request.payload(payloadBuffer, index, mtu);
+    print('Payload: $payload');
+
+    final buffer = ByteDataWriter();
+    buffer.writeUint8(0x05); // Command / DATA_CLA
+    buffer.writeUint16(index); // packet sequence index
+    buffer.writeUint16(payload.length); // data length
+    buffer.write(payload); // payload
+
+    final data = buffer.toBytes();
+    print('Packet: $data');
+
     await bleManager.writeCharacteristicWithResponse(
       characteristic,
-      value: payload,
+      value: data,
     );
   }
 
@@ -139,6 +160,11 @@ class LedgerGattGateway extends GattGateway {
   ) {
     return service.characteristics
         .firstWhereOrNull((c) => c.characteristicId == characteristic);
+  }
+
+  @override
+  Future<void> close() async {
+    disconnect();
   }
 }
 

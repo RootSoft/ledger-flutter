@@ -1,6 +1,6 @@
 import 'package:ledger_flutter/src/algorand/public_key_ble_request.dart';
-import 'package:ledger_flutter/src/api/ledger_ble_connection_manager.dart';
 import 'package:ledger_flutter/src/ledger.dart';
+import 'package:ledger_flutter/src/ledger/ledger_ble_connection_manager.dart';
 
 typedef PermissionRequestCallback = Future<bool> Function();
 
@@ -38,6 +38,4 @@ class Ledger {
 
   Future<void> getAddresses(LedgerDevice device) =>
       _bleConnectionManager.sendRequest(device, PublicKeyBleRequest());
-
-  Future<void> requestPermissions() async {}
 }
