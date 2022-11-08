@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ledger_example/bloc/ledger_bloc.dart';
 import 'package:ledger_example/bloc/ledger_event.dart';
 import 'package:ledger_example/bloc/ledger_state.dart';
+import 'package:ledger_example/widgets/account_list_tile.dart';
 import 'package:ledger_example/widgets/ledger_list_tile.dart';
 
 class LedgerBleScreen extends StatelessWidget {
@@ -12,7 +13,7 @@ class LedgerBleScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Ledger Nano'),
+        title: Text('Ledger Nano X'),
       ),
       body: const LedgerBleView(),
     );
@@ -65,6 +66,15 @@ class _LedgerBleViewState extends State<LedgerBleView> {
               onPressed:
                   state.status == LedgerBleStatus.scanning ? () {} : null,
               child: Text('Stop scanning'),
+            ),
+            ListView.builder(
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: state.accounts.length,
+              shrinkWrap: true,
+              itemBuilder: (_, index) => AccountListTile(
+                address: state.accounts[index],
+                onTap: (account) {},
+              ),
             ),
             TextButton(
               onPressed:

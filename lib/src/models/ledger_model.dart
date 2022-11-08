@@ -20,8 +20,10 @@ class Ledger {
               onPermissionRequest: onPermissionRequest,
             );
 
-  Stream<LedgerDevice> scan({String? filteredAddress}) =>
-      _bleConnectionManager.scan(filteredAddress: filteredAddress);
+  Stream<LedgerDevice> scan({
+    LedgerOptions? options,
+  }) =>
+      _bleConnectionManager.scan();
 
   Future<void> connect(LedgerDevice device) =>
       _bleConnectionManager.connect(device);
@@ -31,8 +33,11 @@ class Ledger {
 
   Future<void> stop() => _bleConnectionManager.stop();
 
-  Future<void> dispose() => _bleConnectionManager.dispose();
+  Future<void> close() => _bleConnectionManager.dispose();
 
-  Future<String> getAccounts(LedgerDevice device) => _bleConnectionManager
-      .sendRequest<String>(device, AlgorandPublicKeyOperation(accountIndex: 0));
+  Future<List<String>> getAccounts(LedgerDevice device) =>
+      _bleConnectionManager.sendRequest<List<String>>(
+        device,
+        AlgorandPublicKeyOperation(accountIndex: 0),
+      );
 }

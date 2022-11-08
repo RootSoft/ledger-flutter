@@ -1,14 +1,14 @@
-import 'package:ledger_flutter/src/api/ble_request.dart';
 import 'package:ledger_flutter/src/ledger.dart';
+import 'package:ledger_flutter/src/ledger/ledger_operation.dart';
 
 abstract class BleConnectionManager {
-  Stream<LedgerDevice> scan({String? filteredAddress});
+  Stream<LedgerDevice> scan({LedgerOptions? options});
 
-  Future<void> connect(LedgerDevice device);
+  Future<void> connect(LedgerDevice device, {LedgerOptions? options});
 
   Future<void> disconnect(LedgerDevice device);
 
-  Future<T> sendRequest<T>(LedgerDevice device, BleRequest request);
+  Future<T> sendRequest<T>(LedgerDevice device, LedgerOperation request);
 
   Future<void> stop();
 

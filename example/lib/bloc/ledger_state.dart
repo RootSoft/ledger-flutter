@@ -1,3 +1,4 @@
+import 'package:algorand_dart/algorand_dart.dart';
 import 'package:equatable/equatable.dart';
 import 'package:ledger_flutter/ledger_flutter.dart';
 
@@ -11,11 +12,13 @@ enum LedgerBleStatus {
 class LedgerBleState extends Equatable {
   final LedgerBleStatus status;
   final List<LedgerDevice> devices;
+  final List<Address> accounts;
   final LedgerDevice? device;
 
   const LedgerBleState({
     this.status = LedgerBleStatus.idle,
     required this.devices,
+    required this.accounts,
     this.device,
   });
 
@@ -23,14 +26,16 @@ class LedgerBleState extends Equatable {
     LedgerBleStatus Function()? status,
     List<LedgerDevice> Function()? devices,
     LedgerDevice? Function()? selectedDevice,
+    List<Address> Function()? accounts,
   }) {
     return LedgerBleState(
       status: status != null ? status() : this.status,
       devices: devices != null ? devices() : this.devices,
       device: selectedDevice != null ? selectedDevice() : device,
+      accounts: accounts != null ? accounts() : this.accounts,
     );
   }
 
   @override
-  List<Object?> get props => [status, devices, device];
+  List<Object?> get props => [status, devices, device, accounts];
 }

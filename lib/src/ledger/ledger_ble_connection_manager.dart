@@ -2,10 +2,10 @@ import 'dart:async';
 
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'package:ledger_flutter/ledger_flutter.dart';
-import 'package:ledger_flutter/src/api/ble_request.dart';
 import 'package:ledger_flutter/src/api/gatt_gateway.dart';
 import 'package:ledger_flutter/src/exceptions/ledger_exception.dart';
 import 'package:ledger_flutter/src/ledger/ledger_gatt_gateway.dart';
+import 'package:ledger_flutter/src/ledger/ledger_operation.dart';
 import 'package:ledger_flutter/src/models/discovered_ledger.dart';
 
 class LedgerBleConnectionManager extends BleConnectionManager {
@@ -15,7 +15,7 @@ class LedgerBleConnectionManager extends BleConnectionManager {
   static const notifyCharacteristicKey = '13D63400-2C97-0004-0001-4C6564676572';
 
   final bleManager = FlutterReactiveBle();
-  final LedgerOptions options;
+  final LedgerOptions _options;
   final PermissionRequestCallback? onPermissionRequest;
   final _scannedIds = <String>{};
   final _connectedDevices = <String, GattGateway>{};
@@ -26,12 +26,12 @@ class LedgerBleConnectionManager extends BleConnectionManager {
       StreamController.broadcast();
 
   LedgerBleConnectionManager({
-    required this.options,
+    required LedgerOptions options,
     this.onPermissionRequest,
-  });
+  }) : _options = options;
 
   @override
-  Stream<LedgerDevice> scan({String? filteredAddress}) async* {
+  Stream<LedgerDevice> scan({LedgerOptions? options}) async* {
     if (_isScanning) {
       return;
     }
@@ -50,7 +50,7 @@ class LedgerBleConnectionManager extends BleConnectionManager {
     _scanSubscription?.cancel();
     _scanSubscription = bleManager.scanForDevices(
       withServices: [Uuid.parse(serviceId)],
-      scanMode: ScanMode.lowLatency,
+      scanMode: options?.scanMode ?? ScanMode.lowLatency,
     ).listen(
       (device) {
         if (_scannedIds.contains(device.id)) {
@@ -69,7 +69,7 @@ class LedgerBleConnectionManager extends BleConnectionManager {
       },
     );
 
-    Future.delayed(Duration(milliseconds: options.maxScanDuration), () {
+    Future.delayed(options?.maxScanDuration ?? _options.maxScanDuration, () {
       stop();
     });
 
@@ -78,8 +78,9 @@ class LedgerBleConnectionManager extends BleConnectionManager {
 
   @override
   Future<void> connect(
-    LedgerDevice device,
-  ) async {
+    LedgerDevice device, {
+    LedgerOptions? options,
+  }) async {
     // Stop scanning when connecting to a device.
     await stop();
 
@@ -96,8 +97,9 @@ class LedgerBleConnectionManager extends BleConnectionManager {
         .connectToAdvertisingDevice(
       id: device.id,
       withServices: [Uuid.parse(serviceId)],
-      prescanDuration: const Duration(seconds: 5),
-      connectionTimeout: const Duration(seconds: 2),
+      prescanDuration: options?.prescanDuration ?? _options.prescanDuration,
+      connectionTimeout:
+          options?.connectionTimeout ?? _options.connectionTimeout,
     )
         .listen(
       (state) async {
@@ -119,8 +121,6 @@ class LedgerBleConnectionManager extends BleConnectionManager {
 
           c.complete();
         }
-
-        print(state);
       },
       onError: (ex) {
         c.completeError(ex);
@@ -131,7 +131,10 @@ class LedgerBleConnectionManager extends BleConnectionManager {
   }
 
   @override
-  Future<T> sendRequest<T>(LedgerDevice device, BleRequest request) async {
+  Future<T> sendRequest<T>(
+    LedgerDevice device,
+    LedgerOperation request,
+  ) async {
     final d = _connectedDevices[device.id];
     if (d == null) {
       throw LedgerException();

@@ -1,11 +1,12 @@
 import 'dart:typed_data';
 
 import 'package:algorand_dart/algorand_dart.dart';
-import 'package:ledger_flutter/src/api/ble_request.dart';
-import 'package:ledger_flutter/src/exceptions/ledger_exception.dart';
+import 'package:ledger_flutter/src/ledger/ledger_operation.dart';
 import 'package:ledger_flutter/src/utils/buffer.dart';
 
-class AlgorandPublicKeyOperation extends BleRequest<String> {
+/// APDU Protocol
+/// https://github.com/LedgerHQ/app-algorand/blob/develop/docs/APDUSPEC.md
+class AlgorandPublicKeyOperation extends LedgerOperation<List<String>> {
   final int accountIndex;
 
   AlgorandPublicKeyOperation({
@@ -26,12 +27,9 @@ class AlgorandPublicKeyOperation extends BleRequest<String> {
   }
 
   @override
-  Future<String> read(ByteDataReader reader, int index, int mtu) async {
-    try {
-      return Address(publicKey: reader.read(reader.remainingLength))
-          .encodedAddress;
-    } catch (ex) {
-      throw LedgerException('', ex);
-    }
+  Future<List<String>> read(ByteDataReader reader, int index, int mtu) async {
+    return [
+      Address(publicKey: reader.read(reader.remainingLength)).encodedAddress,
+    ];
   }
 }

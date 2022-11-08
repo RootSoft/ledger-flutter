@@ -3,10 +3,10 @@ import 'dart:collection';
 
 import 'package:collection/collection.dart';
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
-import 'package:ledger_flutter/src/api/ble_request.dart';
 import 'package:ledger_flutter/src/api/gatt_gateway.dart';
 import 'package:ledger_flutter/src/exceptions/ledger_exception.dart';
 import 'package:ledger_flutter/src/ledger/ledger_gatt_reader.dart';
+import 'package:ledger_flutter/src/ledger/ledger_operation.dart';
 import 'package:ledger_flutter/src/models/discovered_ledger.dart';
 import 'package:ledger_flutter/src/utils/buffer.dart';
 import 'package:stack_trace/stack_trace.dart';
@@ -63,30 +63,28 @@ class LedgerGattGateway extends GattGateway {
 
     _gattReader.read(
       bleManager.subscribeToCharacteristic(characteristic),
-      onData: (data) {
+      onData: (data) async {
         if (_pendingOperations.isEmpty) {
           return;
         }
 
-        final request = _pendingOperations.removeFirst();
-        final reader = ByteDataReader();
-        int offset = (data.length >= 2) ? 2 : 0;
-        reader.add(data.sublist(0, data.length - offset));
-        final response = request.request.read(reader, 0, _mtu);
+        try {
+          final request = _pendingOperations.first;
+          final reader = ByteDataReader();
+          int offset = (data.length >= 2) ? 2 : 0;
+          reader.add(data.sublist(0, data.length - offset));
+          final response = await request.operation.read(reader, 0, _mtu);
 
-        request.completer.complete(response);
+          _pendingOperations.removeFirst();
+          request.completer.complete(response);
+        } catch (ex) {
+          _handleOnError(ex);
+        }
       },
       onError: (ex) {
-        if (_pendingOperations.isEmpty) {
-          return;
-        }
-
-        final request = _pendingOperations.removeFirst();
-        request.completer.completeError(ex);
+        _handleOnError(ex);
       },
     );
-
-    await Future.delayed(const Duration(seconds: 2));
   }
 
   @override
@@ -97,7 +95,7 @@ class LedgerGattGateway extends GattGateway {
   }
 
   @override
-  Future<T> sendRequest<T>(BleRequest request) async {
+  Future<T> sendRequest<T>(LedgerOperation request) async {
     final supported = isRequiredServiceSupported();
     if (!supported) {
       throw LedgerException('Required service not supported');
@@ -196,12 +194,21 @@ class LedgerGattGateway extends GattGateway {
   Future<void> close() async {
     disconnect();
   }
+
+  void _handleOnError(dynamic ex) {
+    if (_pendingOperations.isEmpty) {
+      return;
+    }
+
+    final request = _pendingOperations.removeFirst();
+    request.completer.completeError(ex);
+  }
 }
 
 /// A pending request to the server.
 class _Request {
   /// The method that was sent.
-  final BleRequest request;
+  final LedgerOperation operation;
 
   /// The completer to use to complete the response future.
   final Completer completer;
@@ -209,7 +216,7 @@ class _Request {
   /// The stack chain from where the request was made.
   final Chain chain;
 
-  _Request(this.request, this.completer, this.chain);
+  _Request(this.operation, this.completer, this.chain);
 }
 
 extension ObjectExt<T> on T {

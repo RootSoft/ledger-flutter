@@ -8,7 +8,7 @@ class LedgerChannel {
 
   factory LedgerChannel() {
     final options = LedgerOptions(
-      maxScanDuration: 5000,
+      maxScanDuration: const Duration(milliseconds: 5000),
     );
 
     final ledger = Ledger(

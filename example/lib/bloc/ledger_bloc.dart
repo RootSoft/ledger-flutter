@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:algorand_dart/algorand_dart.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ledger_example/bloc/ledger_event.dart';
@@ -15,6 +16,7 @@ class LedgerBleBloc extends Bloc<LedgerBleEvent, LedgerBleState> {
   }) : super(
           const LedgerBleState(
             devices: [],
+            accounts: [],
           ),
         ) {
     on<LedgerBleScanStarted>(_onScanStarted, transformer: restartable());
@@ -44,12 +46,21 @@ class LedgerBleBloc extends Bloc<LedgerBleEvent, LedgerBleState> {
   ) async {
     final device = event.device;
     await channel.ledger.connect(device);
-    final accounts = await channel.ledger.getAccounts(device);
-    print(accounts);
+    final accounts = <Address>[];
+
+    try {
+      final publicKeys = await channel.ledger.getAccounts(device);
+      accounts.addAll(
+        publicKeys.map((pk) => Address.fromAlgorandAddress(pk)).toList(),
+      );
+    } catch (ex) {
+      print(ex);
+    }
 
     emit(state.copyWith(
       status: () => LedgerBleStatus.connected,
       selectedDevice: () => device,
+      accounts: () => accounts,
     ));
   }
 
@@ -64,13 +75,14 @@ class LedgerBleBloc extends Bloc<LedgerBleEvent, LedgerBleState> {
       status: () => LedgerBleStatus.idle,
       devices: () => [],
       selectedDevice: () => null,
+      accounts: () => [],
     ));
   }
 
   @override
   Future<void> close() async {
     _scanSubscription?.cancel();
-    await channel.ledger.dispose();
+    await channel.ledger.close();
     return super.close();
   }
 }
