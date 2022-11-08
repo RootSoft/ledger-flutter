@@ -7,6 +7,7 @@ enum LedgerBleStatus {
   scanning,
   connected,
   signing,
+  failure,
 }
 
 class LedgerBleState extends Equatable {
@@ -14,12 +15,14 @@ class LedgerBleState extends Equatable {
   final List<LedgerDevice> devices;
   final List<Address> accounts;
   final LedgerDevice? device;
+  final dynamic error;
 
   const LedgerBleState({
     this.status = LedgerBleStatus.idle,
     required this.devices,
     required this.accounts,
     this.device,
+    this.error,
   });
 
   LedgerBleState copyWith({
@@ -27,15 +30,29 @@ class LedgerBleState extends Equatable {
     List<LedgerDevice> Function()? devices,
     LedgerDevice? Function()? selectedDevice,
     List<Address> Function()? accounts,
+    dynamic Function()? error,
   }) {
     return LedgerBleState(
       status: status != null ? status() : this.status,
       devices: devices != null ? devices() : this.devices,
       device: selectedDevice != null ? selectedDevice() : device,
       accounts: accounts != null ? accounts() : this.accounts,
+      error: error != null ? error() : this.error,
+    );
+  }
+
+  LedgerBleState failure({
+    dynamic Function()? error,
+  }) {
+    return LedgerBleState(
+      status: LedgerBleStatus.failure,
+      devices: const [],
+      device: null,
+      accounts: const [],
+      error: error,
     );
   }
 
   @override
-  List<Object?> get props => [status, devices, device, accounts];
+  List<Object?> get props => [status, devices, device, accounts, error];
 }

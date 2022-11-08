@@ -46,6 +46,7 @@ class LedgerBleBloc extends Bloc<LedgerBleEvent, LedgerBleState> {
   ) async {
     final device = event.device;
     await channel.ledger.connect(device);
+
     final accounts = <Address>[];
 
     try {
@@ -53,15 +54,22 @@ class LedgerBleBloc extends Bloc<LedgerBleEvent, LedgerBleState> {
       accounts.addAll(
         publicKeys.map((pk) => Address.fromAlgorandAddress(pk)).toList(),
       );
-    } catch (ex) {
-      print(ex);
-    }
 
-    emit(state.copyWith(
-      status: () => LedgerBleStatus.connected,
-      selectedDevice: () => device,
-      accounts: () => accounts,
-    ));
+      emit(state.copyWith(
+        status: () => LedgerBleStatus.connected,
+        selectedDevice: () => device,
+        accounts: () => accounts,
+      ));
+    } catch (ex) {
+      await channel.ledger.disconnect(device);
+
+      emit(state.copyWith(
+        status: () => LedgerBleStatus.failure,
+        selectedDevice: () => device,
+        accounts: () => accounts,
+        error: () => ex,
+      ));
+    }
   }
 
   Future<void> _onDisconnectStarted(

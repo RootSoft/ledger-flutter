@@ -30,14 +30,17 @@ class LedgerGattGateway extends GattGateway {
 
   /// The map of request ids to pending requests.
   final _pendingOperations = ListQueue<_Request>();
+  final Function? _onError;
 
   LedgerGattGateway({
     required this.bleManager,
     required this.ledger,
     LedgerGattReader? gattReader,
     int mtu = 23,
+    Function? onError,
   })  : _gattReader = gattReader ?? LedgerGattReader(),
-        _mtu = mtu;
+        _mtu = mtu,
+        _onError = onError;
 
   @override
   Future<void> start() async {
@@ -79,10 +82,12 @@ class LedgerGattGateway extends GattGateway {
           request.completer.complete(response);
         } catch (ex) {
           _handleOnError(ex);
+          //_onError?.call(ex);
         }
       },
       onError: (ex) {
         _handleOnError(ex);
+        _onError?.call(ex);
       },
     );
   }
@@ -121,13 +126,14 @@ class LedgerGattGateway extends GattGateway {
     final data = buffer.toBytes();
     print('Packet: $data');
 
+    var completer = Completer<T>.sync();
+    _pendingOperations.addFirst(_Request(request, completer, Chain.current()));
+
     await bleManager.writeCharacteristicWithResponse(
       characteristic,
       value: data,
     );
 
-    var completer = Completer<T>.sync();
-    _pendingOperations.addFirst(_Request(request, completer, Chain.current()));
     return completer.future;
   }
 

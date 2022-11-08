@@ -50,7 +50,9 @@ class LedgerBleConnectionManager extends BleConnectionManager {
     _scanSubscription?.cancel();
     _scanSubscription = bleManager.scanForDevices(
       withServices: [Uuid.parse(serviceId)],
-      scanMode: options?.scanMode ?? ScanMode.lowLatency,
+      scanMode: options?.scanMode ?? _options.scanMode,
+      requireLocationServicesEnabled: options?.requireLocationServicesEnabled ??
+          _options.requireLocationServicesEnabled,
     ).listen(
       (device) {
         if (_scannedIds.contains(device.id)) {
@@ -91,7 +93,6 @@ class LedgerBleConnectionManager extends BleConnectionManager {
     final c = Completer();
 
     StreamSubscription? subscription;
-
     _connectedDevices[device.id]?.disconnect();
     subscription = bleManager
         .connectToAdvertisingDevice(
@@ -114,6 +115,7 @@ class LedgerBleConnectionManager extends BleConnectionManager {
           final gateway = LedgerGattGateway(
             bleManager: bleManager,
             ledger: ledger,
+            onError: (ex) async {},
           );
 
           await gateway.start();
@@ -122,7 +124,8 @@ class LedgerBleConnectionManager extends BleConnectionManager {
           c.complete();
         }
       },
-      onError: (ex) {
+      onError: (ex) async {
+        await disconnect(device);
         c.completeError(ex);
       },
     );
