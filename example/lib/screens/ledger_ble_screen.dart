@@ -1,3 +1,5 @@
+import 'package:algorand_dart/algorand_dart.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ledger_example/bloc/ledger_bloc.dart';
@@ -89,8 +91,21 @@ class _LedgerBleViewState extends State<LedgerBleView> {
                 ),
               ),
               TextButton(
-                onPressed:
-                    state.status == LedgerBleStatus.connected ? () {} : null,
+                onPressed: state.status == LedgerBleStatus.connected
+                    ? () async {
+                        final device = state.device;
+                        final account = state.accounts.firstOrNull;
+                        if (device == null || account == null) {
+                          return;
+                        }
+
+                        final tx = await _buildTransaction(address: account);
+
+                        context
+                            .read<LedgerBleBloc>()
+                            .add(LedgerBleSignTransactionRequested(device, tx));
+                      }
+                    : null,
                 child: Text('Sign transaction'),
               ),
               TextButton(
@@ -113,5 +128,17 @@ class _LedgerBleViewState extends State<LedgerBleView> {
         ),
       ),
     );
+  }
+
+  Future<RawTransaction> _buildTransaction({required Address address}) async {
+    final channel = context.read<LedgerBleBloc>().channel;
+
+    final tx = await channel.algorand.createPaymentTransaction(
+      sender: address,
+      receiver: address,
+      amount: Algo.toMicroAlgos(1),
+    );
+
+    return tx;
   }
 }

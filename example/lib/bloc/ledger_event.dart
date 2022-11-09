@@ -1,5 +1,6 @@
+import 'package:algorand_dart/algorand_dart.dart';
 import 'package:equatable/equatable.dart';
-import 'package:ledger_flutter/ledger_flutter.dart';
+import 'package:ledger_flutter/ledger.dart';
 
 abstract class LedgerBleEvent extends Equatable {
   @override
@@ -24,4 +25,14 @@ class LedgerBleDisconnectRequested extends LedgerBleEvent {
 
   @override
   List<Object?> get props => [device];
+}
+
+class LedgerBleSignTransactionRequested extends LedgerBleEvent {
+  final LedgerDevice device;
+  final RawTransaction transaction;
+
+  LedgerBleSignTransactionRequested(this.device, this.transaction);
+
+  @override
+  List<Object?> get props => [device, transaction];
 }

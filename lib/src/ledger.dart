@@ -1,5 +1,44 @@
-export 'api/ble_connection_manager.dart';
-export 'models/ledger_device.dart';
-export 'models/ledger_model.dart';
-export 'models/ledger_options.dart';
-export 'models/ledger_scan_mode.dart';
+import 'package:ledger_flutter/ledger.dart';
+
+typedef PermissionRequestCallback = Future<bool> Function();
+
+class Ledger {
+  final LedgerOptions _options;
+  final BleConnectionManager _bleConnectionManager;
+  final PermissionRequestCallback? onPermissionRequest;
+
+  Ledger({
+    required LedgerOptions options,
+    this.onPermissionRequest,
+    BleConnectionManager? bleConnectionManager,
+  })  : _options = options,
+        _bleConnectionManager = bleConnectionManager ??
+            LedgerBleConnectionManager(
+              options: options,
+              onPermissionRequest: onPermissionRequest,
+            );
+
+  Stream<LedgerDevice> scan({
+    LedgerOptions? options,
+  }) =>
+      _bleConnectionManager.scan();
+
+  Future<void> connect(
+    LedgerDevice device, {
+    LedgerOptions? options,
+  }) =>
+      _bleConnectionManager.connect(device, options: options);
+
+  Future<void> disconnect(LedgerDevice device) =>
+      _bleConnectionManager.disconnect(device);
+
+  Future<void> stop() => _bleConnectionManager.stop();
+
+  Future<void> close() => _bleConnectionManager.dispose();
+
+  Future<T> sendRequest<T>(
+    LedgerDevice device,
+    LedgerOperation<T> operation,
+  ) =>
+      _bleConnectionManager.sendRequest<T>(device, operation);
+}

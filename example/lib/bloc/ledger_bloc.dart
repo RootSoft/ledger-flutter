@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ledger_example/bloc/ledger_event.dart';
 import 'package:ledger_example/bloc/ledger_state.dart';
 import 'package:ledger_example/channel/ledger_channel.dart';
+import 'package:ledger_flutter/ledger.dart';
 
 class LedgerBleBloc extends Bloc<LedgerBleEvent, LedgerBleState> {
   final LedgerChannel channel;
@@ -21,6 +22,7 @@ class LedgerBleBloc extends Bloc<LedgerBleEvent, LedgerBleState> {
         ) {
     on<LedgerBleScanStarted>(_onScanStarted, transformer: restartable());
     on<LedgerBleConnectRequested>(_onConnectStarted);
+    on<LedgerBleSignTransactionRequested>(_onSignTransactionRequested);
     on<LedgerBleDisconnectRequested>(_onDisconnectStarted);
   }
 
@@ -50,7 +52,10 @@ class LedgerBleBloc extends Bloc<LedgerBleEvent, LedgerBleState> {
     final accounts = <Address>[];
 
     try {
-      final publicKeys = await channel.ledger.getAccounts(device);
+      final algorandApp = AlgorandLedgerApp(channel.ledger);
+      algorandApp.accountIndex = 1;
+
+      final publicKeys = await algorandApp.getAccounts(device);
       accounts.addAll(
         publicKeys.map((pk) => Address.fromAlgorandAddress(pk)).toList(),
       );
@@ -69,6 +74,35 @@ class LedgerBleBloc extends Bloc<LedgerBleEvent, LedgerBleState> {
         accounts: () => accounts,
         error: () => ex,
       ));
+    }
+  }
+
+  Future<void> _onSignTransactionRequested(
+    LedgerBleSignTransactionRequested event,
+    Emitter emit,
+  ) async {
+    final device = event.device;
+    try {
+      final algorandApp = AlgorandLedgerApp(channel.ledger);
+      algorandApp.accountIndex = 1;
+      final signature = await algorandApp.signTransaction(
+        device,
+        event.transaction.toBytes(),
+      );
+
+      final signedTx = SignedTransaction(
+        transaction: event.transaction,
+        signature: signature,
+      );
+
+      final txId = await channel.algorand.sendTransaction(
+        signedTx,
+        waitForConfirmation: true,
+      );
+
+      print(txId);
+    } catch (ex) {
+      print(ex);
     }
   }
 

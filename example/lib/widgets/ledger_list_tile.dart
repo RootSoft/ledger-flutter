@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:ledger_flutter/ledger_flutter.dart';
+import 'package:ledger_flutter/ledger.dart';
 
 typedef LedgerGestureCallback = void Function(LedgerDevice ledger);
 

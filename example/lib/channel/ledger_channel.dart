@@ -1,10 +1,12 @@
-import 'package:ledger_flutter/ledger_flutter.dart';
+import 'package:algorand_dart/algorand_dart.dart';
+import 'package:ledger_flutter/ledger.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class LedgerChannel {
   final Ledger ledger;
+  final Algorand algorand;
 
-  LedgerChannel._(this.ledger);
+  LedgerChannel._(this.ledger, this.algorand);
 
   factory LedgerChannel() {
     final options = LedgerOptions(
@@ -32,6 +34,12 @@ class LedgerChannel {
       },
     );
 
-    return LedgerChannel._(ledger);
+    final algorand = Algorand(
+      algodClient: AlgodClient(
+        apiUrl: AlgoExplorer.MAINNET_ALGOD_API_URL,
+      ),
+    );
+
+    return LedgerChannel._(ledger, algorand);
   }
 }

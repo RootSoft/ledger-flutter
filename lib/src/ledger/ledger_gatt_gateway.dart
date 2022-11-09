@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:collection';
+import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
@@ -117,22 +118,22 @@ class LedgerGattGateway extends GattGateway {
     final payload = await request.write(payloadBuffer, index, _mtu);
     print('Payload: $payload');
 
-    final buffer = ByteDataWriter();
-    buffer.writeUint8(0x05); // Command / DATA_CLA
-    buffer.writeUint16(index); // packet sequence index
-    buffer.writeUint16(payload.length); // data length
-    buffer.write(payload); // payload
-
-    final data = buffer.toBytes();
-    print('Packet: $data');
+    final packets = _pack(payload);
+    // final buffer = ByteDataWriter();
+    // buffer.writeUint8(0x05); // Command / DATA_CLA
+    // buffer.writeUint16(index); // packet sequence index
+    // buffer.writeUint16(payload.length); // data length
+    // buffer.write(payload); // payload
 
     var completer = Completer<T>.sync();
     _pendingOperations.addFirst(_Request(request, completer, Chain.current()));
 
-    await bleManager.writeCharacteristicWithResponse(
-      characteristic,
-      value: data,
-    );
+    for (var packet in packets) {
+      await bleManager.writeCharacteristicWithResponse(
+        characteristic,
+        value: packet,
+      );
+    }
 
     return completer.future;
   }
@@ -208,6 +209,49 @@ class LedgerGattGateway extends GattGateway {
 
     final request = _pendingOperations.removeFirst();
     request.completer.completeError(ex);
+  }
+
+  List<Uint8List> _pack(Uint8List payload) {
+    final output = <Uint8List>[];
+    var sequenceIdx = 0;
+    var offset = 0;
+    var first = true;
+    var remainingBytes = payload.length;
+
+    while (remainingBytes > 0) {
+      final buffer = ByteDataWriter();
+      var remainingSpaceInPacket = mtu - 3;
+
+      // 0x05 Marks application specific data
+      buffer.writeUint8(0x05); // Command / DATA_CLA
+
+      // Encode sequence number
+      buffer.writeUint16(sequenceIdx); // packet sequence index
+
+      // If this is the first packet, also encode the total message length
+      if (first) {
+        remainingSpaceInPacket -= 2;
+        buffer.writeUint16(payload.length); // data length
+        first = false;
+      }
+
+      remainingSpaceInPacket -= 3;
+      var bytesToCopy = (remainingSpaceInPacket < remainingBytes)
+          ? remainingSpaceInPacket
+          : remainingBytes;
+
+      remainingBytes -= bytesToCopy;
+
+      // Copy some number of bytes into the packet
+      buffer.write(
+          payload.getRange(offset, offset + bytesToCopy).toList()); // payload
+
+      sequenceIdx += 1;
+      offset += bytesToCopy;
+      output.add(buffer.toBytes());
+    }
+
+    return output;
   }
 }
 

@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
-import 'package:ledger_flutter/ledger_flutter.dart';
+import 'package:ledger_flutter/ledger.dart';
 
 class DiscoveredLedger {
   final LedgerDevice device;

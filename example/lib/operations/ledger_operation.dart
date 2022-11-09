@@ -1,4 +1,4 @@
-import 'package:ledger_flutter/ledger_flutter.dart';
+import 'package:ledger_flutter/ledger.dart';
 
 abstract class LedgerOperation {
   LedgerDevice get device;
