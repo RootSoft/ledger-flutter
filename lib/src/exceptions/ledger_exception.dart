@@ -1,6 +1,11 @@
 class LedgerException implements Exception {
-  String cause;
-  Object? data;
+  final String message;
+  final Object? cause;
+  final int errorCode;
 
-  LedgerException([this.cause = '', this.data]);
+  LedgerException({
+    this.message = '',
+    this.cause,
+    this.errorCode = 0x6F00,
+  });
 }

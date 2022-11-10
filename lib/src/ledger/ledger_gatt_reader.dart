@@ -82,15 +82,15 @@ class LedgerGattReader {
     void Function(Uint8List event)? onData,
     Function? onError,
   }) {
-    print('Response: $data');
     reset();
-
-    if (data.length == ERROR_DATA_SIZE) {
-      onError?.call(LedgerException());
-    }
 
     if (data.length > ERROR_DATA_SIZE) {
       onData?.call(data);
+    } else if (data.length == ERROR_DATA_SIZE) {
+      final errorCode = ByteData.sublistView(data).getInt16(0);
+      onError?.call(LedgerException(errorCode: errorCode));
+    } else {
+      onError?.call(LedgerException());
     }
   }
 

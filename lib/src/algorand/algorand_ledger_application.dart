@@ -6,7 +6,18 @@ import 'package:ledger_flutter/src/algorand/algorand_sign_msgpack_transaction.da
 
 /// A [LedgerApp] used to perform BLE operations on a ledger [Algorand]
 /// application.
+///
+/// https://github.com/LedgerHQ/app-algorand/blob/develop/docs/APDUSPEC.md
 class AlgorandLedgerApp extends LedgerApp {
+  static const errorExecution = 0x6400;
+  static const errorEmptyBuffer = 0x6982;
+  static const errorOutputBufferTooSmall = 0x6983;
+  static const errorCommandNotAllowed = 0x6986;
+  static const errorInsNotSupported = 0x6D00;
+  static const errorClaNotSupported = 0x6E00;
+  static const errorUnknown = 0x6F00;
+  static const success = 0x8000;
+
   int accountIndex;
 
   AlgorandLedgerApp(
