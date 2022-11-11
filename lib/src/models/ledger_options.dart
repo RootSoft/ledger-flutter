@@ -1,10 +1,12 @@
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 
 class LedgerOptions {
+  /// The [maxScanDuration] is the maximum amount of time BLE discovery should
+  /// run in order to find nearby devices.
   final Duration maxScanDuration;
 
-  /// The [prescanDuration] is the amount of time BLE disovery should run in
-  /// order to find the device.
+  /// The [prescanDuration] is the amount of time BLE discovery should run in
+  /// order to find the device before connecting.
   final Duration prescanDuration;
 
   /// If [connectionTimeout] parameter is supplied and a connection is not
@@ -26,11 +28,16 @@ class LedgerOptions {
   /// some Android devices.
   final bool requireLocationServicesEnabled;
 
+  /// Maximum Transmission Unit, [mtu] is the maximum length of an ATT packet
+  /// and is negotiated between the host and client, before sending APDU messages.
+  final int mtu;
+
   LedgerOptions({
     this.scanMode = ScanMode.lowPower,
     this.requireLocationServicesEnabled = true,
     this.maxScanDuration = const Duration(milliseconds: 15000),
     this.prescanDuration = const Duration(seconds: 5),
     this.connectionTimeout = const Duration(seconds: 2),
+    this.mtu = 23,
   });
 }
