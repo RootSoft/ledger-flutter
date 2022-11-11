@@ -1,6 +1,7 @@
+import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'package:ledger_flutter/ledger.dart';
 
-typedef PermissionRequestCallback = Future<bool> Function();
+typedef PermissionRequestCallback = Future<bool> Function(BleStatus status);
 
 class Ledger {
   final LedgerOptions _options;

@@ -27,14 +27,13 @@ class LedgerBleConnectionManager extends BleConnectionManager {
 
   @override
   Stream<LedgerDevice> scan({LedgerOptions? options}) async* {
-    if (_isScanning) {
+    // Check for permissions
+    final granted = (await onPermissionRequest?.call(status)) ?? true;
+    if (!granted) {
       return;
     }
 
-    // Check for permissions
-    final onPermissionGranted = (await onPermissionRequest?.call()) ?? true;
-    if (!onPermissionGranted) {
-      print('Permission not granted!');
+    if (_isScanning) {
       return;
     }
 
@@ -78,6 +77,12 @@ class LedgerBleConnectionManager extends BleConnectionManager {
     LedgerDevice device, {
     LedgerOptions? options,
   }) async {
+    // Check for permissions
+    final granted = (await onPermissionRequest?.call(status)) ?? true;
+    if (!granted) {
+      return;
+    }
+
     // Stop scanning when connecting to a device.
     await stop();
 
@@ -110,7 +115,7 @@ class LedgerBleConnectionManager extends BleConnectionManager {
           final gateway = LedgerGattGateway(
             bleManager: bleManager,
             ledger: ledger,
-            onError: (ex) async {},
+            mtu: options?.mtu ?? _options.mtu,
           );
 
           await gateway.start();
@@ -135,11 +140,14 @@ class LedgerBleConnectionManager extends BleConnectionManager {
   ) async {
     final d = _connectedDevices[device.id];
     if (d == null) {
-      throw LedgerException();
+      throw LedgerException(message: 'Unable to send request.');
     }
 
     return d.sendRequest<T>(request);
   }
+
+  /// Returns the current status of the BLE subsystem of the host device.
+  BleStatus get status => bleManager.status;
 
   @override
   Future<void> disconnect(LedgerDevice device) async {

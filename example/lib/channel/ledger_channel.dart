@@ -15,22 +15,20 @@ class LedgerChannel {
 
     final ledger = Ledger(
       options: options,
-      onPermissionRequest: () async {
-        if (await Permission.location.request().isGranted) {
-          // Location was granted, now request BLE
-          Map<Permission, PermissionStatus> statuses = await [
-            Permission.location,
-            Permission.bluetoothScan,
-            Permission.bluetoothConnect,
-            Permission.bluetoothAdvertise,
-          ].request();
+      onPermissionRequest: (status) async {
+        // Location was granted, now request BLE
+        Map<Permission, PermissionStatus> statuses = await [
+          Permission.location,
+          Permission.bluetoothScan,
+          Permission.bluetoothConnect,
+          Permission.bluetoothAdvertise,
+        ].request();
 
-          print(statuses[Permission.location]);
-
-          return statuses.values.where((status) => status.isDenied).isEmpty;
+        if (status != BleStatus.ready) {
+          return false;
         }
 
-        return false;
+        return statuses.values.where((status) => status.isDenied).isEmpty;
       },
     );
 

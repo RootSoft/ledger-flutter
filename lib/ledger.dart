@@ -1,5 +1,7 @@
 library ledger_flutter;
 
+export 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
+
 export 'src/algorand/algorand_ledger_application.dart';
 export 'src/api/ble_connection_manager.dart';
 export 'src/api/ble_packer.dart';
