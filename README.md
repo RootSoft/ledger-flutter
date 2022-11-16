@@ -37,8 +37,6 @@ Check out our other Web3 packages below:
 
 ## Getting started
 
----
-
 ### Installation
 
 Install the latest version of this package via pub.dev:
@@ -102,8 +100,6 @@ final publicKeys = await algorandApp.getAccounts(device);
 
 ## Usage
 
----
-
 ### Scanning nearby devices
 
 You can scan for nearby Ledger devices using the `scan()` method. This returns a `Stream` that can be listened to which emits when a new device has been found.
@@ -153,10 +149,27 @@ Once a `LedgerDevice` has been found, you can easily connect to the device using
 await ledger.connect(device);
 ```
 
-A `LedgerException` is thrown if unable to connect to the device. The package also includes a `devices` stream which updates on connection changes.
+A `LedgerException` is thrown if unable to connect to the device. 
+
+The package also includes a `devices` stream which updates on connection changes.
 
 ```dart
 final subscription = ledger.devices.listen((state) => print(state));
+```
+
+### Get public keys
+
+Depending on the required blockchain and Ledger Application Plugin, the `getAccounts()` method can be used to fetch the public keys from the Ledger Nano device.
+
+
+Depending on the implementation and supported protocol, there might be only once public key in the list of accounts.
+
+```dart
+final algorandApp = AlgorandLedgerApp(ledger);
+
+final publicKeys = await algorandApp.getAccounts(device);
+  accounts.addAll(publicKeys.map((pk) => Address.fromAlgorandAddress(pk)).toList(),
+);
 ```
 
 ### Disconnect
@@ -177,8 +190,6 @@ await ledger.close();
 
 ## Custom Ledger App Plugins
 
----
-
 Each blockchain follows it own protocol which needs to be implemented before being able to get public keys & sign transactions.
 
 - [Algorand](https://pub.dev/packages/ledger_algorand)
@@ -187,9 +198,7 @@ Each blockchain follows it own protocol which needs to be implemented before bei
 
 ## Sponsors
 
----
-
-Our top sponsors are shown below! [[Become a Sponsor](https://github.com/sponsors/rootsoft)]
+Our top sponsors are shown below!
 
 <table>
     <tbody>
@@ -205,8 +214,6 @@ Our top sponsors are shown below! [[Become a Sponsor](https://github.com/sponsor
 
 ## Contributing
 
----
-
 Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
 
 If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag `enhancement`.
@@ -220,7 +227,5 @@ If you have a suggestion that would make this better, please fork the repo and c
 Please try to follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).
 
 ## License
-
----
 
 The ledger_flutter SDK is released under the Attribution Assurance License. See LICENSE for details.
