@@ -50,7 +50,7 @@ class LedgerGattGateway extends GattGateway {
 
     _mtu = await bleManager.requestMtu(
       deviceId: ledger.device.id,
-      mtu: 23,
+      mtu: mtu,
     );
 
     final characteristic = QualifiedCharacteristic(
