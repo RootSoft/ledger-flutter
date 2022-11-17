@@ -40,4 +40,28 @@ class LedgerOptions {
     this.connectionTimeout = const Duration(seconds: 2),
     this.mtu = 23,
   });
+
+  LedgerOptions copyWith({
+    ScanMode Function()? scanMode,
+    bool Function()? requireLocationServicesEnabled,
+    Duration Function()? maxScanDuration,
+    Duration Function()? prescanDuration,
+    Duration Function()? connectionTimeout,
+    int Function()? mtu,
+  }) {
+    return LedgerOptions(
+      scanMode: scanMode != null ? scanMode() : this.scanMode,
+      requireLocationServicesEnabled: requireLocationServicesEnabled != null
+          ? requireLocationServicesEnabled()
+          : this.requireLocationServicesEnabled,
+      maxScanDuration:
+          maxScanDuration != null ? maxScanDuration() : this.maxScanDuration,
+      prescanDuration:
+          prescanDuration != null ? prescanDuration() : this.prescanDuration,
+      connectionTimeout: connectionTimeout != null
+          ? connectionTimeout()
+          : this.connectionTimeout,
+      mtu: mtu != null ? mtu() : this.mtu,
+    );
+  }
 }
