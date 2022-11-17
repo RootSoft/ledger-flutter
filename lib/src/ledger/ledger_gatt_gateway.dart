@@ -1,11 +1,8 @@
 import 'dart:async';
 import 'dart:collection';
 
-import 'package:collection/collection.dart';
-import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'package:ledger_flutter/ledger.dart';
 import 'package:ledger_flutter/src/utils/buffer.dart';
-import 'package:stack_trace/stack_trace.dart';
 
 /// https://learn.adafruit.com/introduction-to-bluetooth-low-energy/gatt
 /// https://gist.github.com/btchip/e4994180e8f4710d29c975a49de46e3a
@@ -110,12 +107,11 @@ class LedgerGattGateway extends GattGateway {
     const int index = 0x00;
     final payloadBuffer = ByteDataWriter();
     final payload = await request.write(payloadBuffer, index, _mtu);
-    print('Payload: $payload');
 
     final packets = _packer.pack(payload, mtu);
 
     var completer = Completer<T>.sync();
-    _pendingOperations.addFirst(_Request(request, completer, Chain.current()));
+    _pendingOperations.addFirst(_Request(request, completer));
 
     for (var packet in packets) {
       await bleManager.writeCharacteristicWithResponse(
@@ -165,7 +161,11 @@ class LedgerGattGateway extends GattGateway {
   /// simple <uses-permission> manifest tag.
   @override
   DiscoveredService? getService(Uuid service) {
-    return ledger.services.firstWhereOrNull((s) => s.serviceId == service);
+    try {
+      return ledger.services.firstWhere((s) => s.serviceId == service);
+    } on StateError {
+      return null;
+    }
   }
 
   /// Returns a characteristic with a given UUID out of the list of
@@ -182,8 +182,12 @@ class LedgerGattGateway extends GattGateway {
     DiscoveredService service,
     Uuid characteristic,
   ) {
-    return service.characteristics
-        .firstWhereOrNull((c) => c.characteristicId == characteristic);
+    try {
+      return service.characteristics
+          .firstWhere((c) => c.characteristicId == characteristic);
+    } on StateError {
+      return null;
+    }
   }
 
   @override
@@ -209,10 +213,7 @@ class _Request {
   /// The completer to use to complete the response future.
   final Completer completer;
 
-  /// The stack chain from where the request was made.
-  final Chain chain;
-
-  _Request(this.operation, this.completer, this.chain);
+  _Request(this.operation, this.completer);
 }
 
 extension ObjectExt<T> on T {

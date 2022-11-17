@@ -1,10 +1,8 @@
-import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'package:ledger_flutter/ledger.dart';
 
 typedef PermissionRequestCallback = Future<bool> Function(BleStatus status);
 
 class Ledger {
-  final LedgerOptions _options;
   final BleConnectionManager _bleConnectionManager;
   final PermissionRequestCallback? onPermissionRequest;
 
@@ -12,8 +10,7 @@ class Ledger {
     required LedgerOptions options,
     this.onPermissionRequest,
     BleConnectionManager? bleConnectionManager,
-  })  : _options = options,
-        _bleConnectionManager = bleConnectionManager ??
+  }) : _bleConnectionManager = bleConnectionManager ??
             LedgerBleConnectionManager(
               options: options,
               onPermissionRequest: onPermissionRequest,

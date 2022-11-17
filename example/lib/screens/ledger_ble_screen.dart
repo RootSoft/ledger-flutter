@@ -1,4 +1,3 @@
-import 'package:algorand_dart/algorand_dart.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -16,7 +15,7 @@ class LedgerBleScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Ledger Nano X'),
+        title: const Text('Ledger Nano X'),
       ),
       body: const LedgerBleView(),
     );
@@ -61,7 +60,7 @@ class _LedgerBleViewState extends State<LedgerBleView> {
                 onPressed: () {
                   context.read<LedgerBleBloc>().add(LedgerBleScanStarted());
                 },
-                child: Text('Scan for Ledger devices'),
+                child: const Text('Scan for Ledger devices'),
               ),
               ListView.builder(
                 physics: const NeverScrollableScrollPhysics(),
@@ -79,7 +78,7 @@ class _LedgerBleViewState extends State<LedgerBleView> {
               TextButton(
                 onPressed:
                     state.status == LedgerBleStatus.scanning ? () {} : null,
-                child: Text('Stop scanning'),
+                child: const Text('Stop scanning'),
               ),
               ListView.builder(
                 physics: const NeverScrollableScrollPhysics(),
@@ -99,14 +98,15 @@ class _LedgerBleViewState extends State<LedgerBleView> {
                           return;
                         }
 
-                        final tx = await _buildTransaction(address: account);
-
                         context
                             .read<LedgerBleBloc>()
-                            .add(LedgerBleSignTransactionRequested(device, tx));
+                            .add(LedgerBleSignTransactionRequested(
+                              device,
+                              account,
+                            ));
                       }
                     : null,
-                child: Text('Sign transaction'),
+                child: const Text('Sign transaction'),
               ),
               TextButton(
                 onPressed: state.status == LedgerBleStatus.connected
@@ -121,24 +121,12 @@ class _LedgerBleViewState extends State<LedgerBleView> {
                             .add(LedgerBleDisconnectRequested(device));
                       }
                     : null,
-                child: Text('Disconnect'),
+                child: const Text('Disconnect'),
               ),
             ],
           ),
         ),
       ),
     );
-  }
-
-  Future<RawTransaction> _buildTransaction({required Address address}) async {
-    final channel = context.read<LedgerBleBloc>().channel;
-
-    final tx = await channel.algorand.createPaymentTransaction(
-      sender: address,
-      receiver: address,
-      amount: Algo.toMicroAlgos(1),
-    );
-
-    return tx;
   }
 }

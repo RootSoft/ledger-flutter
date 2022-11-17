@@ -6,17 +6,17 @@ import 'package:ledger_flutter/src/utils/buffer.dart';
 
 class LedgerGattReader {
   /// The APDU command tag 0x05 is used to transfer application specific data.
-  static const DATA_CLA = 0x05;
+  static const dataCla = 0x05;
 
   /// The GET MTU command tag 0x08 is used to query the negociated MTU and
   /// optimize the size of fragments
-  static const MTU_CLA = 0x08;
+  static const mtuCla = 0x08;
 
   /// The GET VERSION command tag 0x00 is used to query the current version of
   /// the protocol being used
-  static const VERSION_CLA = 0x00;
+  static const versionCla = 0x00;
 
-  static const ERROR_DATA_SIZE = 2;
+  static const errorDataSize = 2;
 
   var currentSequence = 0;
   var remainingBytes = 0;
@@ -32,14 +32,12 @@ class LedgerGattReader {
     subscription?.cancel();
     subscription = stream.listen(
       (data) {
-        print('Packet: $data');
-
         // Packets always start with the command & sequence
         final reader = ByteDataReader();
         reader.add(data);
         final command = reader.readUint8();
 
-        if (command != DATA_CLA) {
+        if (command != dataCla) {
           return;
         }
 
@@ -84,9 +82,9 @@ class LedgerGattReader {
   }) {
     reset();
 
-    if (data.length > ERROR_DATA_SIZE) {
+    if (data.length > errorDataSize) {
       onData?.call(data);
-    } else if (data.length == ERROR_DATA_SIZE) {
+    } else if (data.length == errorDataSize) {
       final errorCode = ByteData.sublistView(data).getInt16(0);
       onError?.call(LedgerException(errorCode: errorCode));
     } else {

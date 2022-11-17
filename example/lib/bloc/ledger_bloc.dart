@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:algorand_dart/algorand_dart.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ledger_example/bloc/ledger_event.dart';
 import 'package:ledger_example/bloc/ledger_state.dart';
@@ -82,16 +83,19 @@ class LedgerBleBloc extends Bloc<LedgerBleEvent, LedgerBleState> {
     Emitter emit,
   ) async {
     final device = event.device;
+    final account = event.account;
+    final tx = await _buildTransaction(account: account);
+
     try {
       final algorandApp = AlgorandLedgerApp(channel.ledger);
       algorandApp.accountIndex = 1;
       final signature = await algorandApp.signTransaction(
         device,
-        event.transaction.toBytes(),
+        tx.toBytes(),
       );
 
       final signedTx = SignedTransaction(
-        transaction: event.transaction,
+        transaction: tx,
         signature: signature,
       );
 
@@ -100,9 +104,13 @@ class LedgerBleBloc extends Bloc<LedgerBleEvent, LedgerBleState> {
         waitForConfirmation: true,
       );
 
-      print(txId);
+      if (kDebugMode) {
+        print(txId);
+      }
     } catch (ex) {
-      print(ex);
+      if (kDebugMode) {
+        print(ex);
+      }
     }
   }
 
@@ -126,5 +134,15 @@ class LedgerBleBloc extends Bloc<LedgerBleEvent, LedgerBleState> {
     _scanSubscription?.cancel();
     await channel.ledger.close();
     return super.close();
+  }
+
+  Future<RawTransaction> _buildTransaction({required Address account}) async {
+    final tx = await channel.algorand.createPaymentTransaction(
+      sender: account,
+      receiver: account,
+      amount: Algo.toMicroAlgos(1),
+    );
+
+    return tx;
   }
 }

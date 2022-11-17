@@ -29,10 +29,10 @@ class LedgerBleDisconnectRequested extends LedgerBleEvent {
 
 class LedgerBleSignTransactionRequested extends LedgerBleEvent {
   final LedgerDevice device;
-  final RawTransaction transaction;
+  final Address account;
 
-  LedgerBleSignTransactionRequested(this.device, this.transaction);
+  LedgerBleSignTransactionRequested(this.device, this.account);
 
   @override
-  List<Object?> get props => [device, transaction];
+  List<Object?> get props => [device, account];
 }
