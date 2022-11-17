@@ -45,7 +45,7 @@ Install the latest version of this package via pub.dev:
 ledger_flutter: ^latest-version
 ```
 
-You might want to install additional Ledger App Plugins to support different blockchains. See the [Ledger Plugins]() section below.
+You might want to install additional Ledger App Plugins to support different blockchains. See the [Ledger Plugins](#custom-ledger-app-plugins) section below.
 
 For example, adding Algorand support:
 
@@ -114,14 +114,16 @@ For more in depth details: [Blog post on iOS bluetooth permissions](https://bett
 
 **iOS13 and higher**
 
-```plist
-NSBluetoothAlwaysUsageDescription
+```xml
+<key>NSBluetoothAlwaysUsageDescription</key>
+<string>This app uses bluetooth to find, connect and sign transactions with your Ledger Nano X</string>
 ```
 
 **iOS12 and lower**
 
-```plist
-NSBluetoothPeripheralUsageDescription
+```xml
+<key>NSBluetoothPeripheralUsageDescription</key>
+<string>This app uses bluetooth to find, connect and sign transactions with your Ledger Nano X</string>
 ```
 
 </details>
@@ -226,7 +228,7 @@ final publicKeys = await algorandApp.getAccounts(device);
 
 You can easily sign transactions using the supplied `LedgerApp`.
 
-Here is an example using the algorand_dart SDK:
+Here is an example using the [algorand_dart](https://pub.dev/packages/algorand_dart) SDK:
 
 ```dart
 final algorandApp = AlgorandLedgerApp(channel.ledger);
