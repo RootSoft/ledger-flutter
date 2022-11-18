@@ -5,10 +5,10 @@ import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:convert/convert.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:ledger_algorand/ledger_algorand.dart';
 import 'package:ledger_example/bloc/ledger_event.dart';
 import 'package:ledger_example/bloc/ledger_state.dart';
 import 'package:ledger_example/channel/ledger_channel.dart';
-import 'package:ledger_flutter/ledger.dart';
 
 class LedgerBleBloc extends Bloc<LedgerBleEvent, LedgerBleState> {
   final LedgerChannel channel;

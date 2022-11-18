@@ -200,6 +200,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "4.7.0"
+  ledger_algorand:
+    dependency: "direct main"
+    description:
+      path: "../../ledger-algorand"
+      relative: true
+    source: path
+    version: "0.0.1"
   ledger_flutter:
     dependency: "direct main"
     description:
@@ -395,5 +402,5 @@ packages:
     source: hosted
     version: "2.1.2"
 sdks:
-  dart: ">=2.18.2 <3.0.0"
+  dart: ">=2.18.4 <3.0.0"
   flutter: ">=2.8.0"
