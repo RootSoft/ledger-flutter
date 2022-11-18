@@ -96,14 +96,18 @@ class LedgerBleConnectionManager extends BleConnectionManager {
   @override
   BleStatus get status => _bleManager.status;
 
-  /// A stream providing connection updates for all the connected BLE devices.
+  /// A stream providing the host device BLE subsystem status updates.
   @override
-  Stream<ConnectionStateUpdate> get deviceStateChanges =>
-      _bleManager.connectedDeviceStream;
+  Stream<BleStatus> get statusStateChanges => _bleManager.statusStream;
 
   /// Get a list of connected [LedgerDevice]s.
   @override
   List<LedgerDevice> get devices => _connectedDevices.keys.toList();
+
+  /// A stream providing connection updates for all the connected BLE devices.
+  @override
+  Stream<ConnectionStateUpdate> get deviceStateChanges =>
+      _bleManager.connectedDeviceStream;
 
   @override
   Future<void> disconnect(LedgerDevice device) async {
