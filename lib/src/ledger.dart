@@ -76,4 +76,14 @@ class Ledger {
     LedgerOperation<T> operation,
   ) =>
       _bleConnectionManager.sendRequest<T>(device, operation);
+
+  /// Returns the current status of the BLE subsystem of the host device.
+  BleStatus get status => _bleConnectionManager.status;
+
+  /// A stream providing connection updates for all the connected BLE devices.
+  Stream<ConnectionStateUpdate> get deviceStateChanges =>
+      _bleConnectionManager.deviceStateChanges;
+
+  /// Get a list of connected [LedgerDevice]s.
+  List<LedgerDevice> get devices => _bleConnectionManager.devices;
 }

@@ -9,7 +9,7 @@ class LedgerBleConnectionManager extends BleConnectionManager {
   final _bleManager = FlutterReactiveBle();
   final LedgerOptions _options;
   final PermissionRequestCallback? onPermissionRequest;
-  final _connectedDevices = <String, GattGateway>{};
+  final _connectedDevices = <LedgerDevice, GattGateway>{};
 
   LedgerBleConnectionManager({
     required LedgerOptions options,
@@ -34,7 +34,7 @@ class LedgerBleConnectionManager extends BleConnectionManager {
     final c = Completer();
 
     StreamSubscription? subscription;
-    _connectedDevices[device.id]?.disconnect();
+    await disconnect(device);
 
     subscription = _bleManager
         .connectToAdvertisingDevice(
@@ -58,13 +58,10 @@ class LedgerBleConnectionManager extends BleConnectionManager {
             bleManager: _bleManager,
             ledger: ledger,
             mtu: options?.mtu ?? _options.mtu,
-            onError: (ex) async {
-              await disconnect(device);
-            },
           );
 
           await gateway.start();
-          _connectedDevices[device.id] = gateway;
+          _connectedDevices[device] = gateway;
 
           c.complete();
         }
@@ -87,7 +84,7 @@ class LedgerBleConnectionManager extends BleConnectionManager {
     LedgerDevice device,
     LedgerOperation request,
   ) async {
-    final d = _connectedDevices[device.id];
+    final d = _connectedDevices[device];
     if (d == null) {
       throw LedgerException(message: 'Unable to send request.');
     }
@@ -96,18 +93,28 @@ class LedgerBleConnectionManager extends BleConnectionManager {
   }
 
   /// Returns the current status of the BLE subsystem of the host device.
+  @override
   BleStatus get status => _bleManager.status;
+
+  /// A stream providing connection updates for all the connected BLE devices.
+  @override
+  Stream<ConnectionStateUpdate> get deviceStateChanges =>
+      _bleManager.connectedDeviceStream;
+
+  /// Get a list of connected [LedgerDevice]s.
+  @override
+  List<LedgerDevice> get devices => _connectedDevices.keys.toList();
 
   @override
   Future<void> disconnect(LedgerDevice device) async {
-    _connectedDevices[device.id]?.disconnect();
-    _connectedDevices.remove(device.id);
+    _connectedDevices[device]?.disconnect();
+    _connectedDevices.remove(device);
   }
 
   @override
   Future<void> dispose() async {
     for (var subscription in _connectedDevices.values) {
-      subscription.disconnect();
+      await subscription.disconnect();
     }
 
     _connectedDevices.clear();

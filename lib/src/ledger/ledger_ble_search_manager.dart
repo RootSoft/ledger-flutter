@@ -8,7 +8,7 @@ class LedgerBleSearchManager extends BleSearchManager {
   static const writeCharacteristicKey = '13D63400-2C97-0004-0002-4C6564676572';
   static const notifyCharacteristicKey = '13D63400-2C97-0004-0001-4C6564676572';
 
-  final bleManager = FlutterReactiveBle();
+  final _bleManager = FlutterReactiveBle();
   final LedgerOptions _options;
   final PermissionRequestCallback? onPermissionRequest;
 
@@ -40,7 +40,7 @@ class LedgerBleSearchManager extends BleSearchManager {
     _scannedIds.clear();
 
     _scanSubscription?.cancel();
-    _scanSubscription = bleManager.scanForDevices(
+    _scanSubscription = _bleManager.scanForDevices(
       withServices: [Uuid.parse(serviceId)],
       scanMode: options?.scanMode ?? _options.scanMode,
       requireLocationServicesEnabled: options?.requireLocationServicesEnabled ??
@@ -86,5 +86,5 @@ class LedgerBleSearchManager extends BleSearchManager {
   }
 
   /// Returns the current status of the BLE subsystem of the host device.
-  BleStatus get status => bleManager.status;
+  BleStatus get status => _bleManager.status;
 }
