@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:algorand_dart/algorand_dart.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
+import 'package:convert/convert.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ledger_example/bloc/ledger_event.dart';
@@ -100,14 +101,13 @@ class LedgerBleBloc extends Bloc<LedgerBleEvent, LedgerBleState> {
         signature: signature,
       );
 
-      final txId = await channel.algorand.sendTransaction(
-        signedTx,
-        waitForConfirmation: true,
-      );
-
       if (kDebugMode) {
-        print(txId);
+        print(signedTx);
       }
+
+      emit(state.copyWith(
+        signature: () => hex.encode(signature),
+      ));
     } catch (ex) {
       if (kDebugMode) {
         print(ex);
@@ -127,6 +127,7 @@ class LedgerBleBloc extends Bloc<LedgerBleEvent, LedgerBleState> {
       devices: () => [],
       selectedDevice: () => null,
       accounts: () => [],
+      signature: () => null,
     ));
   }
 

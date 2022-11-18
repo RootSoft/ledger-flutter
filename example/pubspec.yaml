@@ -15,6 +15,7 @@ dependencies:
   bloc_concurrency: ^0.2.0
   equatable: ^2.0.5
   collection: ^1.16.0
+  convert: ^3.1.1
 
   permission_handler: ^10.2.0
 

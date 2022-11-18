@@ -108,6 +108,9 @@ class _LedgerBleViewState extends State<LedgerBleView> {
                     : null,
                 child: const Text('Sign transaction'),
               ),
+              if (state.signature != null) ...[
+                Text(state.signature ?? ''),
+              ],
               TextButton(
                 onPressed: state.status == LedgerBleStatus.connected
                     ? () {

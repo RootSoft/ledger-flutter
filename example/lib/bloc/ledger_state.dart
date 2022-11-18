@@ -15,6 +15,7 @@ class LedgerBleState extends Equatable {
   final List<LedgerDevice> devices;
   final List<Address> accounts;
   final LedgerDevice? device;
+  final String? signature;
   final dynamic error;
 
   const LedgerBleState({
@@ -22,6 +23,7 @@ class LedgerBleState extends Equatable {
     required this.devices,
     required this.accounts,
     this.device,
+    this.signature,
     this.error,
   });
 
@@ -30,6 +32,7 @@ class LedgerBleState extends Equatable {
     List<LedgerDevice> Function()? devices,
     LedgerDevice? Function()? selectedDevice,
     List<Address> Function()? accounts,
+    String? Function()? signature,
     dynamic Function()? error,
   }) {
     return LedgerBleState(
@@ -37,6 +40,7 @@ class LedgerBleState extends Equatable {
       devices: devices != null ? devices() : this.devices,
       device: selectedDevice != null ? selectedDevice() : device,
       accounts: accounts != null ? accounts() : this.accounts,
+      signature: signature != null ? signature() : this.signature,
       error: error != null ? error() : this.error,
     );
   }
@@ -49,10 +53,18 @@ class LedgerBleState extends Equatable {
       devices: const [],
       device: null,
       accounts: const [],
+      signature: null,
       error: error,
     );
   }
 
   @override
-  List<Object?> get props => [status, devices, device, accounts, error];
+  List<Object?> get props => [
+        status,
+        devices,
+        device,
+        accounts,
+        signature,
+        error,
+      ];
 }
