@@ -1,12 +1,12 @@
 name: ledger_flutter
-description: A new Flutter project.
+description: A Flutter plugin to scan, connect & sign transactions using a Ledger Nano X
 version: 0.0.1
-homepage: https://blockshake.io
+homepage: https://github.com/RootSoft/ledger-flutter
 repository: https://github.com/RootSoft/ledger-flutter
 issue_tracker: https://github.com/RootSoft/ledger-flutter/issues
 
 environment:
-  sdk: '>=2.18.2 <3.0.0'
+  sdk: '>=2.18.4 <3.0.0'
   flutter: ">=1.17.0"
 
 dependencies:
@@ -15,7 +15,6 @@ dependencies:
 
   flutter_reactive_ble: ^5.0.2
 
-  algorand_dart: ^2.0.0-dev.4
 dev_dependencies:
   flutter_test:
     sdk: flutter
