@@ -11,6 +11,8 @@ abstract class LedgerApp {
 
   LedgerApp(this.ledger);
 
+  Future<dynamic> getVersion(LedgerDevice device);
+
   Future<List<String>> getAccounts(LedgerDevice device);
 
   Future<Uint8List> signTransaction(
