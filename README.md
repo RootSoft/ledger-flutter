@@ -323,7 +323,7 @@ Follow and implement the APDU protocol for the desired blockchain.
 
 * [Ethereum](https://github.com/LedgerHQ/app-ethereum/blob/develop/doc/ethapp.adoc)
 * [Bitcoin](https://github.com/LedgerHQ/app-bitcoin/blob/master/doc/btc.asc)
-* [Algorand]()
+* [Algorand](https://github.com/LedgerHQ/app-algorand/blob/develop/docs/APDUSPEC.md)
 
 ```dart
 class AlgorandPublicKeyOperation extends LedgerOperation<List<String>> {
