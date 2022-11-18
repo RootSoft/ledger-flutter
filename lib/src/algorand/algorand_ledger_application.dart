@@ -2,7 +2,7 @@ import 'dart:typed_data';
 
 import 'package:ledger_flutter/ledger.dart';
 import 'package:ledger_flutter/src/algorand/algorand_public_key_operation.dart';
-import 'package:ledger_flutter/src/algorand/algorand_sign_msgpack_transaction.dart';
+import 'package:ledger_flutter/src/algorand/algorand_sign_msgpack_operation.dart';
 
 /// A [LedgerApp] used to perform BLE operations on a ledger [Algorand]
 /// application.
@@ -40,7 +40,7 @@ class AlgorandLedgerApp extends LedgerApp {
   ) {
     return ledger.sendRequest<Uint8List>(
       device,
-      AlgorandSignMsgPackTransaction(
+      AlgorandSignMsgPackOperation(
         accountIndex: accountIndex,
         transaction: transaction,
       ),
