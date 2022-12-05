@@ -7,7 +7,7 @@ abstract class LedgerOperation<T> {
   /// The Packet sequence index describes the current sequence for fragmented
   /// payloads.
   /// The first fragment index is 0x00 and increased in following packets.
-  Future<Uint8List> write(ByteDataWriter writer, int index, int mtu);
+  Future<List<Uint8List>> write(ByteDataWriter writer, int index, int mtu);
 
   ///
   /// The Packet sequence index describes the current sequence for fragmented

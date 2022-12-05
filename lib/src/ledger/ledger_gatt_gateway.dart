@@ -104,20 +104,21 @@ class LedgerGattGateway extends GattGateway {
     );
 
     const int index = 0x00;
-    final payloadBuffer = ByteDataWriter();
-    final payload = await request.write(payloadBuffer, index, _mtu);
+    final buffer = ByteDataWriter();
+    final output = await request.write(buffer, index, _mtu);
+    for (var payload in output) {
+      final packets = _packer.pack(payload, mtu);
 
-    final packets = _packer.pack(payload, mtu);
+      for (var packet in packets) {
+        await bleManager.writeCharacteristicWithResponse(
+          characteristic,
+          value: packet,
+        );
+      }
+    }
 
     var completer = Completer<T>.sync();
     _pendingOperations.addFirst(_Request(request, completer));
-
-    for (var packet in packets) {
-      await bleManager.writeCharacteristicWithResponse(
-        characteristic,
-        value: packet,
-      );
-    }
 
     return completer.future;
   }
