@@ -38,6 +38,8 @@ class LedgerBleSearchManager extends BleSearchManager {
     // Start scanning
     _isScanning = true;
     _scannedIds.clear();
+    streamController.close();
+    streamController = StreamController.broadcast();
 
     _scanSubscription?.cancel();
     _scanSubscription = _bleManager.scanForDevices(
@@ -53,7 +55,6 @@ class LedgerBleSearchManager extends BleSearchManager {
 
         final lDevice = LedgerDevice(
           id: device.id,
-          address: device.id,
           name: device.name,
           rssi: device.rssi,
         );
@@ -78,6 +79,7 @@ class LedgerBleSearchManager extends BleSearchManager {
 
     _isScanning = false;
     _scanSubscription?.cancel();
+    streamController.close();
   }
 
   @override
