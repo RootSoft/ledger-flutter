@@ -16,10 +16,19 @@ class LedgerListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      title: Text(ledger.name),
+      title: Text('${ledger.name} ($connectionType)'),
       onTap: () {
         onTap?.call(ledger);
       },
     );
+  }
+
+  String get connectionType {
+    switch (ledger.connectionType) {
+      case ConnectionType.usb:
+        return 'USB';
+      case ConnectionType.ble:
+        return 'BLE';
+    }
   }
 }

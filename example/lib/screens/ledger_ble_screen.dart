@@ -62,6 +62,12 @@ class _LedgerBleViewState extends State<LedgerBleView> {
                 },
                 child: const Text('Scan for Ledger devices'),
               ),
+              TextButton(
+                onPressed: () {
+                  context.read<LedgerBleBloc>().add(LedgerBleUsbStarted());
+                },
+                child: const Text('List USB devices'),
+              ),
               ListView.builder(
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: state.devices.length,

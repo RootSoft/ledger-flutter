@@ -22,7 +22,7 @@ abstract class GattGateway {
 
   void onServicesInvalidated();
 
-  Future<T> sendRequest<T>(LedgerOperation request);
+  Future<T> sendOperation<T>(LedgerOperation<T> operation);
 
   DiscoveredService? getService(Uuid service);
 

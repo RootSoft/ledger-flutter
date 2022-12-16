@@ -9,6 +9,8 @@ abstract class LedgerBleEvent extends Equatable {
 
 class LedgerBleScanStarted extends LedgerBleEvent {}
 
+class LedgerBleUsbStarted extends LedgerBleEvent {}
+
 class LedgerBleConnectRequested extends LedgerBleEvent {
   final LedgerDevice device;
 

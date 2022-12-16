@@ -1,3 +1,7 @@
+# Flutter
+.flutter-plugins
+.flutter-plugins-dependencies
+
 # Miscellaneous
 *.class
 *.log

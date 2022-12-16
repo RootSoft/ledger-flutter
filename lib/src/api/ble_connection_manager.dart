@@ -5,7 +5,7 @@ abstract class BleConnectionManager {
 
   Future<void> disconnect(LedgerDevice device);
 
-  Future<T> sendRequest<T>(LedgerDevice device, LedgerOperation request);
+  Future<T> sendOperation<T>(LedgerDevice device, LedgerOperation<T> operation);
 
   Future<void> dispose();
 

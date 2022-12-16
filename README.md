@@ -365,7 +365,7 @@ Note that the interface for the `LedgerApp` might change for different blockchai
 ```dart
 @override
 Future<List<String>> getAccounts(LedgerDevice device) async {
-    return ledger.sendRequest<List<String>>(
+    return ledger.sendOperation<List<String>>(
       device,
       AlgorandPublicKeyOperation(accountIndex: accountIndex),
     );

@@ -65,9 +65,10 @@ class LedgerGattGateway extends GattGateway {
         try {
           final request = _pendingOperations.first;
           final reader = ByteDataReader();
+          // TODO Is this algorand only?
           int offset = (data.length >= 2) ? 2 : 0;
           reader.add(data.sublist(0, data.length - offset));
-          final response = await request.operation.read(reader, 0, _mtu);
+          final response = await request.operation.read(reader);
 
           _pendingOperations.removeFirst();
           request.completer.complete(response);
@@ -91,7 +92,7 @@ class LedgerGattGateway extends GattGateway {
   }
 
   @override
-  Future<T> sendRequest<T>(LedgerOperation request) async {
+  Future<T> sendOperation<T>(LedgerOperation operation) async {
     final supported = isRequiredServiceSupported();
     if (!supported) {
       throw LedgerException(message: 'Required service not supported');
@@ -103,9 +104,8 @@ class LedgerGattGateway extends GattGateway {
       deviceId: ledger.device.id,
     );
 
-    const int index = 0x00;
-    final buffer = ByteDataWriter();
-    final output = await request.write(buffer, index, _mtu);
+    final writer = ByteDataWriter();
+    final output = await operation.write(writer);
     for (var payload in output) {
       final packets = _packer.pack(payload, mtu);
 
@@ -118,7 +118,7 @@ class LedgerGattGateway extends GattGateway {
     }
 
     var completer = Completer<T>.sync();
-    _pendingOperations.addFirst(_Request(request, completer));
+    _pendingOperations.addFirst(_Request(operation, completer));
 
     return completer.future;
   }

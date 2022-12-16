@@ -23,6 +23,7 @@ class LedgerBleBloc extends Bloc<LedgerBleEvent, LedgerBleState> {
           ),
         ) {
     on<LedgerBleScanStarted>(_onScanStarted, transformer: restartable());
+    on<LedgerBleUsbStarted>(_onUsbStarted);
     on<LedgerBleConnectRequested>(_onConnectStarted);
     on<LedgerBleSignTransactionRequested>(_onSignTransactionRequested);
     on<LedgerBleDisconnectRequested>(_onDisconnectStarted);
@@ -42,6 +43,16 @@ class LedgerBleBloc extends Bloc<LedgerBleEvent, LedgerBleState> {
         );
       },
     );
+  }
+
+  Future<void> _onUsbStarted(LedgerBleUsbStarted event, Emitter emit) async {
+    final devices = await channel.ledger.listUsbDevices();
+    final currentState = state;
+
+    emit(currentState.copyWith(
+      status: () => LedgerBleStatus.scanning,
+      devices: () => [...state.devices, ...devices],
+    ));
   }
 
   Future<void> _onConnectStarted(
