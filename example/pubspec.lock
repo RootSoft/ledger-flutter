@@ -217,11 +217,9 @@ packages:
   ledger_usb:
     dependency: transitive
     description:
-      path: "."
-      ref: master
-      resolved-ref: "9b7e0c83837ec46541521db391dda42467beaf18"
-      url: "https://github.com/RootSoft/ledger-usb.git"
-    source: git
+      path: "../../ledger-usb"
+      relative: true
+    source: path
     version: "0.0.1"
   lints:
     dependency: transitive

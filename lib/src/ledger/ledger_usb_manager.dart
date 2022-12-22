@@ -59,9 +59,16 @@ class LedgerUsbManager extends UsbManager {
       final apdus = await operation.write(writer);
       final response = await _ledgerUsb.exchange(apdus);
 
+      if (response.length == apdus.length * 2) {
+        final errorCode = ByteData.sublistView(response).getInt16(0);
+        throw LedgerException(errorCode: errorCode);
+      } else if (response.isEmpty) {
+        throw LedgerException(message: 'Empty response.');
+      }
+
       final reader = ByteDataReader();
       reader.add(response);
-      return await operation.read(reader);
+      return operation.read(reader);
     } on PlatformException catch (ex) {
       throw LedgerException.fromPlatformException(ex);
     }

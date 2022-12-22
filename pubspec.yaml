@@ -14,12 +14,12 @@ dependencies:
     sdk: flutter
 
   flutter_reactive_ble: ^5.0.2
-#  ledger_usb:
-#    path: "../ledger-usb"
   ledger_usb:
-    git:
-      url: https://github.com/RootSoft/ledger-usb.git
-      ref: master
+    path: "../ledger-usb"
+#  ledger_usb:
+#    git:
+#      url: https://github.com/RootSoft/ledger-usb.git
+#      ref: master
 
 dev_dependencies:
   flutter_test:
