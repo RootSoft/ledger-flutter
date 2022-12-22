@@ -97,7 +97,7 @@ class LedgerBleBloc extends Bloc<LedgerBleEvent, LedgerBleState> {
   ) async {
     final device = event.device;
     final account = event.account;
-    final tx = await _buildTransaction2(account: account);
+    final tx = await _buildTransaction(account: account);
 
     try {
       final algorandApp = AlgorandLedgerApp(channel.ledger);
@@ -112,7 +112,13 @@ class LedgerBleBloc extends Bloc<LedgerBleEvent, LedgerBleState> {
         signature: signature,
       );
 
+      final txId = await channel.algorand.sendTransaction(
+        signedTx,
+        waitForConfirmation: true,
+      );
+
       if (kDebugMode) {
+        print(txId);
         print(signedTx);
       }
 

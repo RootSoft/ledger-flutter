@@ -58,16 +58,25 @@ class LedgerUsbManager extends UsbManager {
       final writer = ByteDataWriter();
       final apdus = await operation.write(writer);
       final response = await _ledgerUsb.exchange(apdus);
+      final output = <Uint8List>[];
 
-      if (response.length == apdus.length * 2) {
-        final errorCode = ByteData.sublistView(response).getInt16(0);
-        throw LedgerException(errorCode: errorCode);
-      } else if (response.isEmpty) {
-        throw LedgerException(message: 'Empty response.');
+      if (response.isEmpty) {
+        throw LedgerException(message: 'No response data from Ledger.');
+      }
+
+      final data = response.last;
+      if (data.length == 2) {
+        final errorCode = ByteData.sublistView(data).getInt16(0);
+        throw PlatformException(code: errorCode.toString());
+      }
+
+      for (var data in response) {
+        int offset = (data.length >= 2) ? 2 : 0;
+        output.add(data.sublist(0, data.length - offset));
       }
 
       final reader = ByteDataReader();
-      reader.add(response);
+      reader.add(output.expand((e) => e).toList());
       return operation.read(reader);
     } on PlatformException catch (ex) {
       throw LedgerException.fromPlatformException(ex);
