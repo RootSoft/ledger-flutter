@@ -18,6 +18,7 @@ export 'src/ledger/ledger_gatt_gateway.dart';
 export 'src/ledger/ledger_gatt_reader.dart';
 export 'src/ledger/ledger_operation.dart';
 export 'src/ledger/ledger_packer.dart';
+export 'src/ledger/ledger_transformer.dart';
 export 'src/ledger/ledger_usb_manager.dart';
 export 'src/models/discovered_ledger.dart';
 export 'src/models/ledger_device.dart';

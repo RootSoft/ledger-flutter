@@ -94,13 +94,18 @@ class Ledger {
   /// Throws a [LedgerException] if unable to complete the request.
   Future<T> sendOperation<T>(
     LedgerDevice device,
-    LedgerOperation<T> operation,
-  ) {
+    LedgerOperation<T> operation, {
+    LedgerTransformer? transformer,
+  }) {
     switch (device.connectionType) {
       case ConnectionType.usb:
-        return _usbManager.sendOperation<T>(device, operation);
+        return _usbManager.sendOperation<T>(device, operation, transformer);
       case ConnectionType.ble:
-        return _bleConnectionManager.sendOperation<T>(device, operation);
+        return _bleConnectionManager.sendOperation<T>(
+          device,
+          operation,
+          transformer,
+        );
     }
   }
 

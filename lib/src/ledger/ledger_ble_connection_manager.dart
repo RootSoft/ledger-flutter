@@ -83,13 +83,17 @@ class LedgerBleConnectionManager extends BleConnectionManager {
   Future<T> sendOperation<T>(
     LedgerDevice device,
     LedgerOperation<T> operation,
+    LedgerTransformer? transformer,
   ) async {
     final d = _connectedDevices[device];
     if (d == null) {
       throw LedgerException(message: 'Unable to send request.');
     }
 
-    return d.sendOperation<T>(operation);
+    return d.sendOperation<T>(
+      operation,
+      transformer: transformer,
+    );
   }
 
   /// Returns the current status of the BLE subsystem of the host device.

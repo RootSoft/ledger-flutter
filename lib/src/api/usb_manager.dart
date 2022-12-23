@@ -7,7 +7,11 @@ abstract class UsbManager {
 
   Future<void> disconnect(LedgerDevice device);
 
-  Future<T> sendOperation<T>(LedgerDevice device, LedgerOperation<T> operation);
+  Future<T> sendOperation<T>(
+    LedgerDevice device,
+    LedgerOperation<T> operation,
+    LedgerTransformer? transformer,
+  );
 
   Future<void> dispose();
 }

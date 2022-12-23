@@ -64,10 +64,15 @@ class LedgerGattGateway extends GattGateway {
 
         try {
           final request = _pendingOperations.first;
+          final transformer = request.transformer;
           final reader = ByteDataReader();
-          // TODO Is this algorand only?
-          int offset = (data.length >= 2) ? 2 : 0;
-          reader.add(data.sublist(0, data.length - offset));
+          if (transformer != null) {
+            final transformed = await transformer.onTransform([data]);
+            reader.add(transformed);
+          } else {
+            reader.add(data);
+          }
+
           final response = await request.operation.read(reader);
 
           _pendingOperations.removeFirst();
@@ -92,7 +97,10 @@ class LedgerGattGateway extends GattGateway {
   }
 
   @override
-  Future<T> sendOperation<T>(LedgerOperation operation) async {
+  Future<T> sendOperation<T>(
+    LedgerOperation operation, {
+    LedgerTransformer? transformer,
+  }) async {
     final supported = isRequiredServiceSupported();
     if (!supported) {
       throw LedgerException(message: 'Required service not supported');
@@ -118,7 +126,7 @@ class LedgerGattGateway extends GattGateway {
     }
 
     var completer = Completer<T>.sync();
-    _pendingOperations.addFirst(_Request(operation, completer));
+    _pendingOperations.addFirst(_Request(operation, transformer, completer));
 
     return completer.future;
   }
@@ -210,10 +218,13 @@ class _Request {
   /// The method that was sent.
   final LedgerOperation operation;
 
+  /// The transformer that needs to be applied.
+  final LedgerTransformer? transformer;
+
   /// The completer to use to complete the response future.
   final Completer completer;
 
-  _Request(this.operation, this.completer);
+  _Request(this.operation, this.transformer, this.completer);
 }
 
 extension ObjectExt<T> on T {
