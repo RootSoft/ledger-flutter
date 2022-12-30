@@ -151,7 +151,13 @@ class LedgerBleBloc extends Bloc<LedgerBleEvent, LedgerBleState> {
   @override
   Future<void> close() async {
     _scanSubscription?.cancel();
-    await channel.ledger.close();
+    final device = state.device;
+    if (device != null) {
+      await channel.ledger.dispose(
+        onError: (error) {},
+      );
+    }
+
     return super.close();
   }
 

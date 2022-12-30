@@ -82,10 +82,26 @@ class Ledger {
   /// your [LedgerOptions].
   Future<void> stopScanning() => _bleSearchManager.stop();
 
+  /// Close any communication with the connected [LedgerDevice]s for the
+  /// specified connection type and free all resources.
+  Future<void> close(ConnectionType connectionType) async {
+    switch (connectionType) {
+      case ConnectionType.usb:
+        return _usbManager.dispose();
+      case ConnectionType.ble:
+        return _bleConnectionManager.dispose();
+    }
+  }
+
   /// Close any communication with all connected [LedgerDevice]s and free
   /// all resources.
-  Future<void> close() async {
-    await _usbManager.dispose();
+  Future<void> dispose({Function? onError}) async {
+    try {
+      await _usbManager.dispose();
+    } catch (ex) {
+      onError?.call(LedgerException(cause: ex));
+    }
+
     await _bleConnectionManager.dispose();
   }
 
