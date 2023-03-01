@@ -36,10 +36,10 @@ Check out our other Web3 packages below:
 
 ## Supported devices
 
-|         | BLE | USB |
-|---------|-----|-----|
-| Android | [x] | [x] |
-| iOS     | [x] | [ ] |
+|         | BLE                | USB                |
+|---------|--------------------|--------------------|
+| Android | :heavy_check_mark: | :heavy_check_mark: |
+| iOS     | :heavy_check_mark: | :x:                |
 
 ## Getting started
 
@@ -387,7 +387,7 @@ Our top sponsors are shown below!
     <tbody>
         <tr>
             <td align="center" style="background-color: white">
-                <a href="https://blockshake.io/"><img src="https://pbs.twimg.com/profile_images/1491803720593522691/7jXDOpGn_400x400.png" width="225"/></a>
+                <a href="https://blockshake.io/"><img src="https://drive.google.com/file/d/14cjQcIZ0LsYACKI0l2Ubbk55FGHhEWeT/view" width="225"/></a>
             </td>
         </tr>
     </tbody>
