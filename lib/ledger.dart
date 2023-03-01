@@ -7,7 +7,6 @@ export 'src/api/ble_packer.dart';
 export 'src/api/ble_search_manager.dart';
 export 'src/api/gatt_gateway.dart';
 export 'src/api/usb_manager.dart';
-export 'src/api/usb_manager.dart';
 export 'src/exceptions/ledger_exception.dart';
 export 'src/ledger.dart';
 export 'src/ledger/connection_type.dart';
