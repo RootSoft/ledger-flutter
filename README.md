@@ -387,7 +387,12 @@ Our top sponsors are shown below!
     <tbody>
         <tr>
             <td align="center" style="background-color: white">
-                <a href="https://blockshake.io/"><img src="https://play-lh.googleusercontent.com/Qr5ob7KMKf7gfxR4sQOCzs4LKi3pjCbbIBi7MkevWVP6SrEhS2vjDaqzDXyr9xWAYRMz=w240-h480-rw" width="225"/></a>
+                <a href="https://defly.app/"><img src="https://play-lh.googleusercontent.com/Qr5ob7KMKf7gfxR4sQOCzs4LKi3pjCbbIBi7MkevWVP6SrEhS2vjDaqzDXyr9xWAYRMz=w240-h480-rw" width="225"/></a>
+                <p><a href="https://defly.app/"><strong>Defly</strong></a></p>
+            </td>
+            <td align="center" style="background-color: white">
+                <a href="https://blockshake.io/"><img src="https://pbs.twimg.com/profile_images/1491803720593522691/7jXDOpGn_400x400.png" width="225"/></a>
+                <p><a href="https://blockshake.io/"><strong>Blockshake</strong></a></p>
             </td>
         </tr>
     </tbody>
