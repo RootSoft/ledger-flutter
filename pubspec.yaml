@@ -1,7 +1,7 @@
 name: ledger_flutter
-description: A Flutter plugin to scan, connect & sign transactions using a Ledger Nano X
-version: 0.0.1
-homepage: https://github.com/RootSoft/ledger-flutter
+description: A Flutter plugin to scan, connect & sign transactions using your Ledger Nano devices
+version: 1.0.0
+homepage: https://developers.ledger.com/
 repository: https://github.com/RootSoft/ledger-flutter
 issue_tracker: https://github.com/RootSoft/ledger-flutter/issues
 
@@ -13,13 +13,8 @@ dependencies:
   flutter:
     sdk: flutter
 
-  flutter_reactive_ble: ^5.0.2
-  ledger_usb:
-    path: "../ledger-usb"
-#  ledger_usb:
-#    git:
-#      url: https://github.com/RootSoft/ledger-usb.git
-#      ref: master
+  flutter_reactive_ble: ^5.0.3
+  ledger_usb: ^1.0.0
 
 dev_dependencies:
   flutter_test:
