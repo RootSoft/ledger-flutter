@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:ledger_flutter/ledger.dart';
+import 'package:ledger_flutter/ledger_flutter.dart';
 
 class LedgerBleSearchManager extends BleSearchManager {
   /// Ledger Nano X service id

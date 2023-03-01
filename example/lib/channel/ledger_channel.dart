@@ -1,5 +1,5 @@
 import 'package:algorand_dart/algorand_dart.dart';
-import 'package:ledger_flutter/ledger.dart';
+import 'package:ledger_flutter/ledger_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class LedgerChannel {
