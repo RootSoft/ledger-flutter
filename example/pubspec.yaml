@@ -19,11 +19,11 @@ dependencies:
 
   permission_handler: ^10.2.0
 
-  ledger_flutter:
-    path: ../
+  ledger_flutter: ^1.0.0
+    # path: ../
 
-  ledger_algorand:
-    path: "../../ledger-algorand"
+  ledger_algorand: ^1.0.0-pre.1
+    # path: "../../ledger-algorand"
 
   algorand_dart: ^2.0.0-dev.4
 
