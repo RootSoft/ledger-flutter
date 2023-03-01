@@ -7,7 +7,7 @@
 <h1 align="center">ledger-flutter</h1>
 
 <p align="center">
-    A Flutter plugin to scan, connect & sign transactions using a Ledger Nano X
+    A Flutter plugin to scan, connect & sign transactions using Ledger Nano devices using USB & BLE
     <br />
     <a href="https://pub.dev/documentation/ledger_flutter/latest/"><strong>« Explore the docs »</strong></a>
     <br />
@@ -22,8 +22,9 @@
 
 ## Overview
 
-The Ledger Nano X is the perfect hardware wallet for managing your crypto & NFTs on the go.
-This Flutter plugin makes it easy to find nearby Ledger devices, connect with them and sign transactions over BLE.
+Ledger Nano devices are the perfect hardware wallets for managing your crypto & NFTs on the go.
+This Flutter plugin makes it easy to find nearby Ledger devices, connect with them and sign transactions over USB and/or BLE.
+
 
 ### Web3 Ecosystem Integrations
 
@@ -31,9 +32,14 @@ We are expanding the Flutter ecosystem to grow the Web3 community.
 Check out our other Web3 packages below:
 
 - [WalletConnect](https://pub.dev/packages/walletconnect_dart)
-- [Reach](https://pub.dev/packages/reach_dart)
 - [Algorand](https://pub.dev/packages/algorand_dart)
 
+## Supported devices
+
+|         | BLE | USB |
+|---------|-----|-----|
+| Android | [x] | [x] |
+| iOS     | [x] | [ ] |
 
 ## Getting started
 
