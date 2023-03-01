@@ -387,7 +387,7 @@ Our top sponsors are shown below!
     <tbody>
         <tr>
             <td align="center" style="background-color: white">
-                <a href="https://blockshake.io/"><img src="https://drive.google.com/file/d/14cjQcIZ0LsYACKI0l2Ubbk55FGHhEWeT/view" width="225"/></a>
+                <a href="https://blockshake.io/"><img src="https://play-lh.googleusercontent.com/Qr5ob7KMKf7gfxR4sQOCzs4LKi3pjCbbIBi7MkevWVP6SrEhS2vjDaqzDXyr9xWAYRMz=w240-h480-rw" width="225"/></a>
             </td>
         </tr>
     </tbody>
