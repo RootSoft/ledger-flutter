@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:typed_data';
 
-import 'package:ledger_flutter/src/exceptions/ledger_exception.dart';
 import 'package:ledger_flutter/src/utils/buffer.dart';
 
 class LedgerGattReader {
@@ -15,8 +14,6 @@ class LedgerGattReader {
   /// The GET VERSION command tag 0x00 is used to query the current version of
   /// the protocol being used
   static const versionCla = 0x00;
-
-  static const errorDataSize = 2;
 
   var currentSequence = 0;
   var remainingBytes = 0;
@@ -60,7 +57,6 @@ class LedgerGattReader {
           _handleData(
             Uint8List.fromList(payload),
             onData: onData,
-            onError: onError,
           );
         } else if (remainingBytes > 0) {
           // wait for next message
@@ -78,18 +74,9 @@ class LedgerGattReader {
   void _handleData(
     Uint8List data, {
     void Function(Uint8List event)? onData,
-    Function? onError,
   }) {
     reset();
-
-    if (data.length > errorDataSize) {
-      onData?.call(data);
-    } else if (data.length == errorDataSize) {
-      final errorCode = ByteData.sublistView(data).getInt16(0);
-      onError?.call(LedgerException(errorCode: errorCode));
-    } else {
-      onError?.call(LedgerException());
-    }
+    onData?.call(data);
   }
 
   /// Reset the reader

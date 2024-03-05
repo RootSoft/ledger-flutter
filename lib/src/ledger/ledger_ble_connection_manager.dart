@@ -36,11 +36,8 @@ class LedgerBleConnectionManager extends BleConnectionManager {
     StreamSubscription? subscription;
     await disconnect(device);
 
-    subscription = _bleManager
-        .connectToAdvertisingDevice(
+    subscription = _bleManager.connectToDevice(
       id: device.id,
-      withServices: [Uuid.parse(serviceId)],
-      prescanDuration: options?.prescanDuration ?? _options.prescanDuration,
       connectionTimeout:
           options?.connectionTimeout ?? _options.connectionTimeout,
     )
