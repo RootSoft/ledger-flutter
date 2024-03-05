@@ -57,7 +57,6 @@ class LedgerGattReader {
           _handleData(
             Uint8List.fromList(payload),
             onData: onData,
-            onError: onError,
           );
         } else if (remainingBytes > 0) {
           // wait for next message
@@ -75,10 +74,8 @@ class LedgerGattReader {
   void _handleData(
     Uint8List data, {
     void Function(Uint8List event)? onData,
-    Function? onError,
   }) {
     reset();
-
     onData?.call(data);
   }
 
