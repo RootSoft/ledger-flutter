@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:typed_data';
 
-import 'package:ledger_flutter/src/exceptions/ledger_exception.dart';
 import 'package:ledger_flutter/src/utils/buffer.dart';
 
 class LedgerGattReader {
@@ -16,8 +15,6 @@ class LedgerGattReader {
   /// the protocol being used
   static const versionCla = 0x00;
 
-  static const errorDataSize = 2;
-
   var currentSequence = 0;
   var remainingBytes = 0;
   var payload = <int>[];
@@ -26,8 +23,8 @@ class LedgerGattReader {
 
   void read(
     Stream<List<int>> stream, {
-    void Function(Uint8List event)? onData,
-    Function? onError,
+    required void Function(Uint8List event) onData,
+    required void Function(Object exception) onError,
   }) {
     subscription?.cancel();
     subscription = stream.listen(
@@ -57,11 +54,7 @@ class LedgerGattReader {
         payload.addAll(reader.read(reader.remainingLength));
 
         if (remainingBytes == 0) {
-          _handleData(
-            Uint8List.fromList(payload),
-            onData: onData,
-            onError: onError,
-          );
+          onData(Uint8List.fromList(payload));
         } else if (remainingBytes > 0) {
           // wait for next message
           currentSequence += 1;
@@ -70,26 +63,9 @@ class LedgerGattReader {
         }
       },
       onError: (ex) {
-        onError?.call(ex);
+        onError.call(ex);
       },
     );
-  }
-
-  void _handleData(
-    Uint8List data, {
-    void Function(Uint8List event)? onData,
-    Function? onError,
-  }) {
-    reset();
-
-    if (data.length > errorDataSize) {
-      onData?.call(data);
-    } else if (data.length == errorDataSize) {
-      final errorCode = ByteData.sublistView(data).getInt16(0);
-      onError?.call(LedgerException(errorCode: errorCode));
-    } else {
-      onError?.call(LedgerException());
-    }
   }
 
   /// Reset the reader
