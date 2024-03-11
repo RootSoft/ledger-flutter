@@ -15,8 +15,6 @@ class LedgerGattReader {
   /// the protocol being used
   static const versionCla = 0x00;
 
-  static const errorDataSize = 2;
-
   var currentSequence = 0;
   var remainingBytes = 0;
   var payload = <int>[];
