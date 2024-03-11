@@ -54,7 +54,10 @@ class LedgerGattReader {
         payload.addAll(reader.read(reader.remainingLength));
 
         if (remainingBytes == 0) {
-          onData(Uint8List.fromList(payload));
+          final data = Uint8List.fromList(payload);
+          reset();
+
+          onData(data);
         } else if (remainingBytes > 0) {
           // wait for next message
           currentSequence += 1;
