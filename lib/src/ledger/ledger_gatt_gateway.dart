@@ -117,7 +117,7 @@ class LedgerGattGateway extends GattGateway {
         final Uint8List rawData,
         final int? timestamp,
       ) async {
-        if (ledger.device.id != deviceId) {
+        if (_disposed || ledger.device.id != deviceId) {
           return;
         }
 
@@ -175,11 +175,22 @@ class LedgerGattGateway extends GattGateway {
     }
   }
 
-  @override
-  Future<void> disconnect() async {
+  /// Fails every waiting request with [ConnectionLostException], so callers never hang on a dead link.
+  /// Does not touch the BLE link itself.
+  void connectionLost() {
+    if (_disposed) return;
     _disposed = true;
     unawaited(_gattReader.close());
-    _pendingOperations.clear();
+    final error = ConnectionLostException(connectionType: ConnectionType.ble);
+    while (_pendingOperations.isNotEmpty) {
+      final request = _pendingOperations.removeFirst();
+      if (!request.completer.isCompleted) request.completer.completeError(error);
+    }
+  }
+
+  @override
+  Future<void> disconnect() async {
+    connectionLost();
     await UniversalBle.disconnect(ledger.device.id);
   }
 
@@ -189,6 +200,7 @@ class LedgerGattGateway extends GattGateway {
     LedgerTransformer? transformer,
   }) async {
     final supported = await isRequiredServiceSupported();
+    if (_disposed) throw ConnectionLostException(connectionType: ConnectionType.ble);
     if (!supported) {
       throw ServiceNotSupportedException(
         connectionType: ConnectionType.ble,
@@ -331,14 +343,15 @@ class _Request {
   void addData(Uint8List data) {
     // First packet should be at least 5 bytes long
     // Rest should be at least 3 bytes long
-    if (data.length < 3 || (data[2] == 0 && data.length < 5)) {
+    // Frame header: tag (1 byte), packet index (big-endian u16), and on packet 0 the total length (big-endian u16)
+    final packetIndex = data.length < 3 ? -1 : (data[1] << 8) | data[2];
+    if (packetIndex < 0 || (packetIndex == 0 && data.length < 5)) {
       throw UnexpectedDataPacketException(
         data: data,
         reason: UnexpectedDataPacketReason.tooShortLength,
         connectionType: ConnectionType.ble,
       );
     }
-    final packetIndex = data[2];
     if (_partialData.containsKey(packetIndex)) {
       throw UnexpectedDataPacketException(
         reason: UnexpectedDataPacketReason.indexAlreadySet,
@@ -353,7 +366,7 @@ class _Request {
           connectionType: ConnectionType.ble,
         );
       }
-      _expectedDataLength = data[4];
+      _expectedDataLength = (data[3] << 8) | data[4];
     }
 
     // for first packet, skip the first 5 bytes | for the rest, skip the first 3 bytes

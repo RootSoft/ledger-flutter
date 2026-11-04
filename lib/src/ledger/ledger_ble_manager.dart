@@ -4,7 +4,6 @@ import "package:flutter/foundation.dart";
 import "package:universal_ble/universal_ble.dart";
 
 import "../api/connection_manager.dart";
-import "../api/gatt_gateway.dart";
 import "../exceptions/ledger_exception.dart";
 import "../ledger_interface.dart";
 import "../models/connection_change_event.dart";
@@ -25,7 +24,7 @@ class LedgerBleConnectionManager extends ConnectionManager {
 
   final PermissionRequestCallback onPermissionRequest;
 
-  final _connectedDevices = <String, ({GattGateway gateway, LedgerDevice device})>{};
+  final _connectedDevices = <String, ({LedgerGattGateway gateway, LedgerDevice device})>{};
   final _connectionStateControllers = <String, StreamController<BleConnectionState>>{};
 
   final List<OnConnectionChange> _connectionChangeListeners = [];
@@ -137,6 +136,8 @@ class LedgerBleConnectionManager extends ConnectionManager {
 
   Future<void> _handleConnectionChange(String deviceId, bool isConnected, String? err) async {
     final state = isConnected ? BleConnectionState.connected : BleConnectionState.disconnected;
+    // The link is gone: drop the session so requests waiting on it fail instead of hanging.
+    if (!isConnected) _connectedDevices.remove(deviceId)?.gateway.connectionLost();
     _getOrCreateConnectionStateController(deviceId).add(state);
   }
 
