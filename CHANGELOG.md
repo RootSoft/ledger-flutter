@@ -1,3 +1,8 @@
+## 1.6.3
+
+- Fixed a BLE request waiting for its response forever when the device disconnects or `disconnect()` is called. The waiting request now fails with `ConnectionLostException`, and requests still queued on the connection fail with `DeviceNotConnectedException`. Connect again to get a new session
+- Fixed BLE responses longer than 255 bytes: the frame header's packet index and response length are now read as 16-bit values
+
 ## 1.6.2
 
 - Fixed Bluetooth on web for Ledger Flex, Stax and Nano Gen5: web scan results have no advertised services, so the device was treated as a Nano X and connecting failed with "Required service not supported". The device type now comes from the services discovered on connect
