@@ -60,7 +60,7 @@ class LedgerUsbManager extends ConnectionManager {
         reader.add(response.expand((e) => e).toList());
       }
 
-      return operation.read(reader);
+      return await operation.read(reader);
     } on PlatformException catch (ex) {
       throw LedgerExceptionUtils.fromPlatformException(ex, connectionType);
     }

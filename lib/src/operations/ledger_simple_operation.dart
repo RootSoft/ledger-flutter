@@ -22,7 +22,7 @@ class LedgerSimpleOperation extends LedgerRawOperation<ByteDataReader> {
     String? debugName,
   }) {
     // ignore: no_runtimetype_tostring
-    debugName = debugName ?? runtimeType.toString();
+    this.debugName = debugName ?? runtimeType.toString();
   }
 
   @override

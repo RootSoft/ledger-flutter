@@ -2,6 +2,8 @@
 
 - Fixed a BLE request waiting for its response forever when the device disconnects or `disconnect()` is called. The waiting request now fails with `ConnectionLostException`, and requests still queued on the connection fail with `DeviceNotConnectedException`. Connect again to get a new session
 - Fixed BLE responses longer than 255 bytes: the frame header's packet index and response length are now read as 16-bit values
+- Fixed `LedgerSimpleOperation` throwing `LateInitializationError` when `debugPrintEnabled` is on
+- Fixed errors thrown while reading a USB response bypassing the `PlatformException` handling
 
 ## 1.6.2
 
