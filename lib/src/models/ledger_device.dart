@@ -1,4 +1,4 @@
-import "package:flutter/material.dart";
+import "package:flutter/foundation.dart";
 import "package:ledger_usb_plus/usb_device.dart";
 
 import "../ledger/connection_type.dart";

@@ -1,3 +1,10 @@
+## 2.0.0
+
+- **Breaking:** Updated universal_ble to ^3.3.0. This package re-exports `package:universal_ble/universal_ble.dart`, so universal_ble 3's breaking changes reach code that uses those types directly: `UniversalBle.onConnectionChange` receives a `BleConnectionChange` and `UniversalBle.onValueChange` a `BleCharacteristicValue`, `QueueType.auto` is the new default, `BleConnectionParametersUpdated` is renamed `BleConnectionParametersChange`, and BLE device ids (`LedgerDevice.id` from a scan) are lower-case on Android and iOS. See the [universal_ble 3.0.0 changelog](https://pub.dev/packages/universal_ble/changelog#300). Apps that only use the ledger API need no change
+- BLE device ids passed in by the app are compared in universal_ble's canonical form, so a `LedgerDevice` holding an id in another case (e.g. an upper-case Android MAC kept from an older version) still gets its responses and connection updates
+- Replaced the deprecated `package:flutter/material.dart` imports with `package:flutter/foundation.dart` (no change to the minimum Flutter version)
+- Toolchain: Flutter 3.50.0 (Dart 3.14.0) for development; the minimum SDK constraints are unchanged
+
 ## 1.6.3
 
 - Fixed a BLE request waiting for its response forever when the device disconnects or `disconnect()` is called. The waiting request now fails with `ConnectionLostException`, and requests still queued on the connection fail with `DeviceNotConnectedException`. Connect again to get a new session

@@ -46,7 +46,12 @@ class _BlePlatform extends UniversalBlePlatform {
   Future<void> disconnect(String deviceId) async => loseConnection();
 
   @override
-  Future<List<BleService>> discoverServices(String deviceId, bool withDescriptors) async => [
+  Future<List<BleService>> discoverServices(
+    String deviceId,
+    bool withDescriptors, {
+    DiscoverServicesPlatformConfig? platformConfig,
+  }) async =>
+      [
         BleService(_device.deviceInfo.serviceId, [
           BleCharacteristic(_device.deviceInfo.writeCharacteristicKey, [CharacteristicProperty.write], []),
           BleCharacteristic(_device.deviceInfo.notifyCharacteristicKey, [CharacteristicProperty.notify], []),
@@ -133,6 +138,21 @@ void main() {
     final fresh = await send(await connect(), 3);
     platform.respond([5, 0, 0, 0, 1, 7]);
     expect(await fresh, 7);
+  });
+
+  test("a device id in another case than the emitted one still gets its responses and link loss", () async {
+    // universal_ble emits lower-case ids on native platforms; a caller may hold an upper-case Android MAC.
+    final device = _device.copyWith(id: () => _device.id.toUpperCase());
+    await manager.connect(device);
+    final connection = LedgerConnection(manager, device);
+
+    final response = await send(connection, 1);
+    platform.respond([5, 0, 0, 0, 1, 9]);
+    expect(await response, 9);
+
+    final active = await send(connection, 2);
+    platform.loseConnection();
+    await expectLater(active, throwsA(isA<ConnectionLostException>()));
   });
 
   test("an explicit disconnect fails the waiting request", () async {

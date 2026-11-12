@@ -1,6 +1,6 @@
 name: ledger_flutter_plus
 description: A Flutter plugin to scan, connect & sign transactions using your Ledger Nano devices
-version: 1.6.3
+version: 2.0.0
 homepage: https://developers.ledger.com/
 repository: https://github.com/vespr-wallet/ledger-flutter-plus
 issue_tracker: https://github.com/vespr-wallet/ledger-flutter-plus/issues
@@ -13,7 +13,7 @@ dependencies:
   flutter:
     sdk: flutter
 
-  universal_ble: ^2.0.0
+  universal_ble: ^3.3.0
   universal_platform: ^1.1.0
   ledger_usb_plus: ^1.0.8
   rxdart: ^0.28.0

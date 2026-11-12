@@ -36,12 +36,12 @@ class LedgerBleConnectionManager extends ConnectionManager {
     required this.onPermissionRequest,
   }) {
     _connectionChangeListeners.add(_handleConnectionChange);
-    UniversalBle.onConnectionChange = (deviceId, isConnected, err) {
-      final state = isConnected ? BleConnectionState.connected : BleConnectionState.disconnected;
+    UniversalBle.onConnectionChange = (change) {
+      final state = change.isConnected ? BleConnectionState.connected : BleConnectionState.disconnected;
 
       _onConnectionChangeController.add(
         BleConnectionChangeEvent(
-          deviceId: deviceId,
+          deviceId: change.deviceId,
           newState: state,
         ),
       );
@@ -53,7 +53,7 @@ class LedgerBleConnectionManager extends ConnectionManager {
 
       for (final OnConnectionChange listener in connectionChangeListeners) {
         try {
-          listener(deviceId, isConnected, err);
+          listener(change);
         } catch (e) {
           debugPrint("Error in connection change listener: $e");
         }
@@ -110,7 +110,7 @@ class LedgerBleConnectionManager extends ConnectionManager {
       final deviceType = LedgerDeviceType.fromBleServices(services.map((e) => e.uuid));
       final connectedDevice = deviceType == null ? device : device.copyWith(deviceInfo: () => deviceType);
 
-      final subscription = _getOrCreateConnectionStateController(device.id);
+      final subscription = _getOrCreateConnectionStateController(_canonicalId(device.id));
 
       final ledger = DiscoveredLedger(
         device: connectedDevice,
@@ -127,18 +127,18 @@ class LedgerBleConnectionManager extends ConnectionManager {
               _bleMasterTimeout,
             ),
           );
-      _connectedDevices[device.id] = (gateway: gateway, device: connectedDevice);
+      _connectedDevices[_canonicalId(device.id)] = (gateway: gateway, device: connectedDevice);
     } on LedgerException {
       await disconnect(device.id);
       rethrow;
     }
   }
 
-  Future<void> _handleConnectionChange(String deviceId, bool isConnected, String? err) async {
-    final state = isConnected ? BleConnectionState.connected : BleConnectionState.disconnected;
+  void _handleConnectionChange(BleConnectionChange change) {
+    final state = change.isConnected ? BleConnectionState.connected : BleConnectionState.disconnected;
     // The link is gone: drop the session so requests waiting on it fail instead of hanging.
-    if (!isConnected) _connectedDevices.remove(deviceId)?.gateway.connectionLost();
-    _getOrCreateConnectionStateController(deviceId).add(state);
+    if (!change.isConnected) _connectedDevices.remove(change.deviceId)?.gateway.connectionLost();
+    _getOrCreateConnectionStateController(change.deviceId).add(state);
   }
 
   StreamController<BleConnectionState> _getOrCreateConnectionStateController(
@@ -157,7 +157,7 @@ class LedgerBleConnectionManager extends ConnectionManager {
   ) async {
     if (_disposed) throw LedgerManagerDisposedException(ConnectionType.ble);
 
-    final d = _connectedDevices[device.id];
+    final d = _connectedDevices[_canonicalId(device.id)];
     if (d == null) {
       throw DeviceNotConnectedException(
         requestedOperation: "ble_manager: sendOperation",
@@ -197,7 +197,8 @@ class LedgerBleConnectionManager extends ConnectionManager {
   Stream<BleConnectionState> deviceStateChanges(String deviceId) {
     if (_disposed) throw LedgerManagerDisposedException(ConnectionType.ble);
 
-    return _onConnectionChangeController.stream.where((e) => e.deviceId == deviceId).map((e) => e.newState);
+    final id = _canonicalId(deviceId);
+    return _onConnectionChangeController.stream.where((e) => e.deviceId == id).map((e) => e.newState);
   }
 
   @override
@@ -209,7 +210,8 @@ class LedgerBleConnectionManager extends ConnectionManager {
 
   // Bypass dispose check here because this method is called from dispose
   Future<void> _disconnect(String deviceId) async {
-    final gateway = _connectedDevices.remove(deviceId)?.gateway;
+    final id = _canonicalId(deviceId);
+    final gateway = _connectedDevices.remove(id)?.gateway;
     if (gateway != null) {
       // UniversalBle.disconnect is called internally by gateway.disconnect
       await gateway.disconnect();
@@ -217,7 +219,7 @@ class LedgerBleConnectionManager extends ConnectionManager {
       await UniversalBle.disconnect(deviceId);
     }
 
-    unawaited(_connectionStateControllers.remove(deviceId)?.close());
+    unawaited(_connectionStateControllers.remove(id)?.close());
   }
 
   @override
@@ -252,3 +254,7 @@ class LedgerBleConnectionManager extends ConnectionManager {
   @override
   final ConnectionType connectionType = ConnectionType.ble;
 }
+
+/// universal_ble emits device ids in canonical form (lower-case on native platforms, verbatim on web), so ids passed in
+/// by callers, e.g. an upper-case Android MAC kept from an older version, are canonicalised before comparing or keying.
+String _canonicalId(String deviceId) => UniversalBle.canonicalDeviceId(deviceId);
