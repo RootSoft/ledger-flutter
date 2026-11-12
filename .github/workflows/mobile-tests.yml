@@ -1,0 +1,47 @@
+name: Unit Tests
+
+on:
+  pull_request:
+    branches:
+      - master
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: read
+  actions: read
+  checks: write
+
+jobs:
+  test:
+    name: Run Flutter Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Install asdf & tools
+        uses: asdf-vm/actions/install@v4
+
+      - name: Install dependencies
+        run: |
+          flutter pub get
+
+      - name: Analyze code
+        run: flutter analyze
+
+      - name: Run tests
+        run: |
+          flutter test --coverage --file-reporter="json:coverage/app-results.json" --test-randomize-ordering-seed random
+
+      - name: Test Report
+        uses: dorny/test-reporter@v3
+        if: always()
+        with:
+          name: Flutter Tests
+          path: 'coverage/*.json'
+          reporter: flutter-json
+          fail-on-error: true
+        continue-on-error: true
